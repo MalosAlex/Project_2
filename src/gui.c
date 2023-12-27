@@ -1,6 +1,7 @@
 #include "gui.h"
 #include <gtk/gtk.h>
 #include <stdlib.h>
+#include "functions.h"
 
 // Path: src/gui.c
 
@@ -33,7 +34,6 @@ void gui_init(void)
 
     gtk_builder_add_from_file(builder, full_path, NULL);
     
-    
     login_window = GTK_WINDOW(gtk_builder_get_object(builder,"login_window"));
     login_grid = GTK_GRID(gtk_builder_get_object(builder,"login_grid"));
     login_welcome = GTK_LABEL(gtk_builder_get_object(builder,"login_welcome"));
@@ -47,5 +47,9 @@ void gui_init(void)
     login_error_username = GTK_LABEL(gtk_builder_get_object(builder,"login_error_username"));
     login_error_password = GTK_LABEL(gtk_builder_get_object(builder,"login_error_password"));
     login_exit_button = GTK_BUTTON(gtk_builder_get_object(builder,"login_exit_button"));
+
+    g_signal_connect(login_exit_button, "clicked", G_CALLBACK(on_login_exit_clicked), NULL);
+    g_signal_connect(G_OBJECT(login_username_entry), "changed", G_CALLBACK(check_username), NULL);
+    g_signal_connect(G_OBJECT(login_password_entry), "changed", G_CALLBACK(check_password), NULL);
 
 }
