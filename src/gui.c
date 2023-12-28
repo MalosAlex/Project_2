@@ -20,7 +20,7 @@ GtkLabel *login_error_username;
 GtkLabel *login_error_password;
 GtkButton *login_exit_button;
 
-void gui_init(void)
+void gui_login_init(void)
 {
     // Login window
     gtk_init(NULL, NULL);
@@ -51,13 +51,21 @@ void gui_init(void)
 
     // Connect signals
     g_signal_connect(login_exit_button, "clicked", G_CALLBACK(on_login_exit_clicked), NULL);
+    g_signal_connect(login_button, "clicked", G_CALLBACK(check_login), NULL);
+    g_signal_connect(register_button, "clicked", G_CALLBACK(check_register), NULL);
     g_signal_connect(G_OBJECT(login_username_entry), "changed", G_CALLBACK(validate_login), NULL);
     g_signal_connect(G_OBJECT(login_password_entry), "changed", G_CALLBACK(validate_login), NULL);
     gtk_widget_set_sensitive(GTK_WIDGET(login_button), FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(register_button), FALSE);
 
 
     gtk_widget_show_all(GTK_WIDGET(login_window));
 
     gtk_main();
 
+}
+
+void main_menu_init(void)
+{
+    return;
 }

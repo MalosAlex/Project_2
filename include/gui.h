@@ -22,6 +22,7 @@ extern GtkButton *login_exit_button;
 
 
 // Function declarations related to the GUI
-void gui_init(void);
+void gui_login_init(void);
+void main_menu_init(void);
 
 #endif // GUI_H

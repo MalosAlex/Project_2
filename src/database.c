@@ -83,6 +83,43 @@ void insertSampleData(sqlite3 *db){
     sqlite3_exec(db, sql, 0, 0, 0);
 }
 
+void insert_user(const char *username, const char *password){
+    sqlite3 *db;
+    int rc = sqlite3_open("banking_app_database.db", &db);
+    if (rc != SQLITE_OK){
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        exit(1);
+    }
+    const char *sql = "INSERT INTO Users (Username, Password) VALUES (?, ?)";
+    sqlite3_stmt *stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error preparing statement\n");
+        return;
+    }
+    // Bind parameters
+    if (sqlite3_bind_text(stmt, 1, username, -1, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 1\n");
+        return;
+    }
+    if (sqlite3_bind_text(stmt, 2, password, -1, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 2\n");
+        return;
+    }
+    // Execute the statement
+    int result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE)
+    {
+        fprintf(stderr, "Error inserting new user into Users table\n");
+        return;
+    }
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+}
+
 void sqlInit(){
     sqlite3 *db;
     int rc = sqlite3_open("banking_app_database.db", &db);
