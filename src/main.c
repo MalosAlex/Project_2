@@ -17,7 +17,10 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    gui_login_init();
+    gui_init();
     
+    gtk_widget_show_all(GTK_WIDGET(login_window));
+
+    gtk_main();
     return 0;
 }

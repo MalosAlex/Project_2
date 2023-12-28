@@ -9,7 +9,7 @@
 
 void on_login_exit_clicked(GtkButton *button, gpointer user_data)
 {
-    gtk_widget_destroy(GTK_WIDGET(login_window));
+    gtk_widget_hide(GTK_WIDGET(login_window));
     gtk_main_quit();
 }
 
@@ -159,10 +159,15 @@ gboolean check_login(GtkButton *button, gpointer user_data)
         sqlite3_finalize(stmt);
         // Close the database
         sqlite3_close(db);
-        // Destroy the login window
-        gtk_widget_destroy(GTK_WIDGET(login_window));
+        // Clear the username and password entries and the errors
+        gtk_entry_set_text(login_username_entry, "");
+        gtk_entry_set_text(login_password_entry, "");
+        gtk_label_set_text(login_error_username, "");
+        gtk_label_set_text(login_error_password, "");
+        // Hide the login window
+        gtk_widget_hide(GTK_WIDGET(login_window));
         // Call the main menu
-        main_menu_init();
+        gtk_widget_show_all(GTK_WIDGET(main_window));
         return TRUE;
     }
     else
@@ -230,7 +235,25 @@ gboolean check_register(GtkButton *button, gpointer user_data)
         // Display a success message
         gtk_label_set_text(login_error_username, "Account created successfully");
         gtk_label_set_text(login_error_password, "Account created successfully");
+        // Empty the username and password entries and the errors
+        gtk_entry_set_text(login_username_entry, "");
+        gtk_entry_set_text(login_password_entry, "");
+        gtk_label_set_text(login_error_username, "");
+        gtk_label_set_text(login_error_password, "");
         return TRUE;
     }
 }
 
+void sign_out(GtkMenuItem *menuitem, gpointer user_data)
+{
+    g_print("Sign out\n");
+    gtk_widget_hide(GTK_WIDGET(main_window));
+    gtk_widget_show_all(GTK_WIDGET(login_window));
+}
+
+void quit_main_menu(GtkMenuItem *menuitem, gpointer user_data)
+{
+    g_print("Quit\n");
+    gtk_widget_destroy(GTK_WIDGET(main_window));
+    gtk_main_quit();
+}

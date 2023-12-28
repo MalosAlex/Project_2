@@ -11,4 +11,6 @@ gboolean check_password(GtkEntry *entry, gpointer user_data);
 gboolean check_login(GtkButton *button, gpointer user_data);
 gboolean check_register(GtkButton *button, gpointer user_data);
 
+void sign_out(GtkMenuItem *menuitem, gpointer user_data);
+void quit_main_menu(GtkMenuItem *menuitem, gpointer user_data);
 #endif

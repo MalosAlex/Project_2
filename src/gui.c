@@ -20,7 +20,30 @@ GtkLabel *login_error_username;
 GtkLabel *login_error_password;
 GtkButton *login_exit_button;
 
-void gui_login_init(void)
+GtkWindow *main_window;
+GtkGrid *main_grid;
+GtkMenuBar *menu_bar;
+GtkMenuItem *exit_item;
+GtkMenuItem *data_item;
+GtkMenuItem *view_item;
+GtkMenu *exit_menu;
+GtkMenuItem *main_sign_out;
+GtkMenuItem *main_quit;
+GtkMenu *data_menu;
+GtkMenuItem *csv_import;
+GtkMenuItem *csv_export;
+GtkMenuItem *excel_import;
+GtkMenuItem *excel_export;
+GtkMenuItem *pdf_import;
+GtkMenuItem *pdf_export;
+GtkMenu *view_menu;
+GtkMenuItem *accounts_view;
+GtkMenuItem *balance_view;
+GtkMenuItem *transactions_view;
+GtkMenuItem *activity_view;
+
+
+void gui_init(void)
 {
     // Login window
     gtk_init(NULL, NULL);
@@ -48,6 +71,29 @@ void gui_login_init(void)
     login_error_password = GTK_LABEL(gtk_builder_get_object(builder,"login_error_password"));
     login_exit_button = GTK_BUTTON(gtk_builder_get_object(builder,"login_exit_button"));
 
+    main_window = GTK_WINDOW(gtk_builder_get_object(builder,"main_window"));
+    main_grid = GTK_GRID(gtk_builder_get_object(builder,"main_grid"));
+    menu_bar = GTK_MENU_BAR(gtk_builder_get_object(builder,"menu_bar"));
+    exit_item = GTK_MENU_ITEM(gtk_builder_get_object(builder,"exit_item"));
+    data_item = GTK_MENU_ITEM(gtk_builder_get_object(builder,"data_item"));
+    view_item = GTK_MENU_ITEM(gtk_builder_get_object(builder,"view_item"));
+    exit_menu = GTK_MENU(gtk_builder_get_object(builder,"exit_menu"));
+    main_sign_out = GTK_MENU_ITEM(gtk_builder_get_object(builder,"main_sign_out"));
+    main_quit = GTK_MENU_ITEM(gtk_builder_get_object(builder,"main_quit"));
+    data_menu = GTK_MENU(gtk_builder_get_object(builder,"data_menu"));
+    csv_import = GTK_MENU_ITEM(gtk_builder_get_object(builder,"csv_import"));
+    csv_export = GTK_MENU_ITEM(gtk_builder_get_object(builder,"csv_export"));
+    excel_import = GTK_MENU_ITEM(gtk_builder_get_object(builder,"excel_import"));
+    excel_export = GTK_MENU_ITEM(gtk_builder_get_object(builder,"excel_export"));
+    pdf_import = GTK_MENU_ITEM(gtk_builder_get_object(builder,"pdf_import"));
+    pdf_export = GTK_MENU_ITEM(gtk_builder_get_object(builder,"pdf_export"));
+    view_menu = GTK_MENU(gtk_builder_get_object(builder,"view_menu"));
+    accounts_view = GTK_MENU_ITEM(gtk_builder_get_object(builder,"accounts_view"));
+    balance_view = GTK_MENU_ITEM(gtk_builder_get_object(builder,"balance_view"));
+    transactions_view = GTK_MENU_ITEM(gtk_builder_get_object(builder,"transactions_view"));
+    activity_view = GTK_MENU_ITEM(gtk_builder_get_object(builder,"activity_view"));
+
+
 
     // Connect signals
     g_signal_connect(login_exit_button, "clicked", G_CALLBACK(on_login_exit_clicked), NULL);
@@ -58,14 +104,11 @@ void gui_login_init(void)
     gtk_widget_set_sensitive(GTK_WIDGET(login_button), FALSE);
     gtk_widget_set_sensitive(GTK_WIDGET(register_button), FALSE);
 
+    // Main window
+    g_signal_connect(main_sign_out, "activate", G_CALLBACK(sign_out), NULL);
+    g_signal_connect(main_quit, "activate", G_CALLBACK(quit_main_menu), NULL);
 
-    gtk_widget_show_all(GTK_WIDGET(login_window));
-
-    gtk_main();
 
 }
 
-void main_menu_init(void)
-{
-    return;
-}
+

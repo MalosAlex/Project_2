@@ -6,7 +6,7 @@ void createCustomersTable();
 void createFinancialTransactionsTable();
 void DisplayData();
 void insertSampleData();
-void insert_user(const char *username, const char *password);
+void insert_user();
 void sqlInit();
 
 #endif // DATABASE_H
