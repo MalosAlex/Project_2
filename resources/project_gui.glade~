@@ -5,12 +5,19 @@
   <object class="GtkWindow" id="login_window">
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Enter into account</property>
-    <property name="icon">bank.png</property>
+    <property name="resizable">False</property>
+    <property name="default-width">700</property>
+    <property name="default-height">300</property>
     <child>
       <!-- n-columns=3 n-rows=4 -->
       <object class="GtkGrid" id="login_grid">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="resize-mode">immediate</property>
+        <property name="row-spacing">4</property>
+        <property name="column-spacing">4</property>
+        <property name="row-homogeneous">True</property>
+        <property name="column-homogeneous">True</property>
         <child>
           <object class="GtkLabel" id="login_welcome">
             <property name="visible">True</property>
@@ -107,6 +114,7 @@
           <object class="GtkLabel" id="login_error_username">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="wrap">True</property>
           </object>
           <packing>
             <property name="left-attach">2</property>
@@ -117,6 +125,7 @@
           <object class="GtkLabel" id="login_error_password">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="wrap">True</property>
           </object>
           <packing>
             <property name="left-attach">2</property>
@@ -129,7 +138,6 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
-            <signal name="clicked" handler="on_login_exit_clicked" swapped="no"/>
           </object>
           <packing>
             <property name="left-attach">2</property>

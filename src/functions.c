@@ -12,21 +12,36 @@ void on_login_exit_clicked(GtkButton *button, gpointer user_data)
     gtk_main_quit();
 }
 
-void check_username(GtkEntry *entry, gpointer user_data)
+void validate_login(GtkEntry *entry, gpointer user_data)
+{
+    gboolean v1 = check_username(login_username_entry, NULL);
+    gboolean v2 = check_password(login_password_entry, NULL);
+    if (v1 == TRUE && v2 == TRUE)
+    {
+        gtk_widget_set_sensitive(GTK_WIDGET(login_button), TRUE);
+    }
+    else
+    {
+        gtk_widget_set_sensitive(GTK_WIDGET(login_button), FALSE);
+    }
+}
+gboolean check_username(GtkEntry *entry, gpointer user_data)
 {
     const char *username = gtk_entry_get_text(entry);
     if (strlen(username) < 5)
     {
         gtk_label_set_text(login_error_username, "Username must be at least 5 characters long");
+        return FALSE;
     }
     else
     {
-        gtk_label_set_text(login_error_username, "");
+        gtk_label_set_markup(GTK_LABEL(login_error_username), "<span font_desc='30'><b>✔</b></span>");
+        return TRUE;
     }
     //TODO check if username is already taken, after implementing the database
 }
 
-void check_password(GtkEntry *entry, gpointer user_data)
+gboolean check_password(GtkEntry *entry, gpointer user_data)
 {
     const char *password = gtk_entry_get_text(entry);
     const char *sp_chr = "@!#$^&*()-_=+[{]}|;:,<.>/?";
@@ -34,17 +49,17 @@ void check_password(GtkEntry *entry, gpointer user_data)
     if (strlen(password) < 5)
     {
         gtk_label_set_text(login_error_password, "Password must be at least 5 characters long");
-        return;
+        return FALSE;
     }
     else if (strlen(password) > 20)
     {
         gtk_label_set_text(login_error_password, "Password must be at most 20 characters long");
-        return;
+        return FALSE;
     }
     else if (strchr(password, ' ') != NULL)
     {
         gtk_label_set_text(login_error_password, "Password must not contain spaces");
-        return;
+        return FALSE;
     }
     int ok = 0;
     int n = 0;
@@ -53,7 +68,7 @@ void check_password(GtkEntry *entry, gpointer user_data)
         if (password[i] < 33 || password[i] > 126)
         {
             gtk_label_set_text(login_error_password, "Password must contain only printable characters");
-            return;
+            return FALSE;
         }
         for (int j = 0; j < strlen(sp_chr); j++)
         {
@@ -75,15 +90,16 @@ void check_password(GtkEntry *entry, gpointer user_data)
     if (ok == 0)
     {
         gtk_label_set_text(login_error_password, "Password must contain at least one special character");
-        return;
+        return FALSE;
     }
     else if (n == 0)
     {
         gtk_label_set_text(login_error_password, "Password must contain at least one digit");
-        return;
+        return FALSE;
     }
     else
     {
-        gtk_label_set_text(login_error_password, "");
+        gtk_label_set_markup(GTK_LABEL(login_error_password), "<span font_desc='30'><b>✔</b></span>");
+        return TRUE;
     }
 }   

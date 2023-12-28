@@ -49,10 +49,13 @@ void gui_init(void)
     login_exit_button = GTK_BUTTON(gtk_builder_get_object(builder,"login_exit_button"));
 
 
+    // Connect signals
     g_signal_connect(login_exit_button, "clicked", G_CALLBACK(on_login_exit_clicked), NULL);
-    g_signal_connect(G_OBJECT(login_username_entry), "changed", G_CALLBACK(check_username), NULL);
-    g_signal_connect(G_OBJECT(login_password_entry), "changed", G_CALLBACK(check_password), NULL);
-    
+    g_signal_connect(G_OBJECT(login_username_entry), "changed", G_CALLBACK(validate_login), NULL);
+    g_signal_connect(G_OBJECT(login_password_entry), "changed", G_CALLBACK(validate_login), NULL);
+    gtk_widget_set_sensitive(GTK_WIDGET(login_button), FALSE);
+
+
     gtk_widget_show_all(GTK_WIDGET(login_window));
 
     gtk_main();
