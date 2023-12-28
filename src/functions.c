@@ -1,6 +1,6 @@
 // Path: src/functions.c
-#include "functions.h"
-#include "gui.h"  
+#include "/home/ghaster/Proiecte/Project_2/include/functions.h"
+#include "/home/ghaster/Proiecte/Project_2/include/gui.h"  
 #include <stdio.h>
 #include <gtk/gtk.h>
 #include <string.h>

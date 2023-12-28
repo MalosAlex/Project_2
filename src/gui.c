@@ -1,7 +1,7 @@
-#include "gui.h"
+#include "/home/ghaster/Proiecte/Project_2/include/gui.h"
 #include <gtk/gtk.h>
 #include <stdlib.h>
-#include "functions.h"
+#include "/home/ghaster/Proiecte/Project_2/include/functions.h"
 
 // Path: src/gui.c
 
@@ -48,8 +48,13 @@ void gui_init(void)
     login_error_password = GTK_LABEL(gtk_builder_get_object(builder,"login_error_password"));
     login_exit_button = GTK_BUTTON(gtk_builder_get_object(builder,"login_exit_button"));
 
+
     g_signal_connect(login_exit_button, "clicked", G_CALLBACK(on_login_exit_clicked), NULL);
     g_signal_connect(G_OBJECT(login_username_entry), "changed", G_CALLBACK(check_username), NULL);
     g_signal_connect(G_OBJECT(login_password_entry), "changed", G_CALLBACK(check_password), NULL);
+    
+    gtk_widget_show_all(GTK_WIDGET(login_window));
+
+    gtk_main();
 
 }
