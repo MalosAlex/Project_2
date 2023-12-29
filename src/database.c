@@ -20,13 +20,11 @@ void createUsersTable(sqlite3 *db){
 void createCustomersTable(sqlite3 *db){
     const char *sql = "CREATE TABLE IF NOT EXISTS Customers ("
                       "CustomerID INTEGER PRIMARY KEY AUTOINCREMENT,"
-                      "UserID INTEGER NOT NULL,"
                       "FirstName TEXT NOT NULL,"
                       "LastName TEXT NOT NULL,"
                       "Address TEXT NOT NULL,"
                       "Email TEXT NOT NULL,"
-                      "Phone TEXT NOT NULL,"
-                      "FOREIGN KEY (UserID) REFERENCES Users(UserID))";
+                      "Phone TEXT NOT NULL)";         
     int result = sqlite3_exec(db, sql, 0, 0, 0);
     if (result != SQLITE_OK) {
         fprintf(stderr, "Error creating Customers table: %s\n", sqlite3_errmsg(db));
@@ -37,7 +35,7 @@ void createFinancialTransactionsTable(sqlite3 *db){
     const char *sql = "CREATE TABLE IF NOT EXISTS FinancialTransactions ("
                       "TransactionID INTEGER PRIMARY KEY AUTOINCREMENT,"
                       "UserID INTEGER NOT NULL,"
-                      "CustomerID INTEGER NOT NULL,"
+                      "CustomerID INTEGER ,"  // NULLABLE since we can have transactions without a customer
                       "TransactionType TEXT NOT NULL,"
                       "Amount REAL NOT NULL,"
                       "Date TEXT NOT NULL,"
@@ -50,6 +48,38 @@ void createFinancialTransactionsTable(sqlite3 *db){
 
 }
 
+void createAccountTable(sqlite3 *db)
+{
+    const char *sql = "CREATE TABLE IF NOT EXISTS Accounts ("
+                      "AccountID INTEGER PRIMARY KEY AUTOINCREMENT,"
+                      "UserID INTEGER NOT NULL,"
+                      "AccountType TEXT NOT NULL,"
+                      "Balance REAL NOT NULL,"
+                      "FOREIGN KEY (UserID) REFERENCES Users(UserID))";
+    int result = sqlite3_exec(db, sql, 0, 0, 0);
+    if (result != SQLITE_OK)
+    {
+        fprintf(stderr, "Error creating Accounts table: %s\n", sqlite3_errmsg(db));
+    }
+
+}
+
+void createActivityLogTable(sqlite3 *db)
+{
+    const char *sql = "CREATE TABLE IF NOT EXISTS ActivityLog ("
+                      "LogID INTEGER PRIMARY KEY AUTOINCREMENT,"
+                      "AccountID INTEGER NOT NULL,"
+                      "ActivityType TEXT NOT NULL,"
+                      "Amount REAL,"
+                      "Date TEXT NOT NULL,"
+                      "FOREIGN KEY (AccountID) REFERENCES Accounts(AccountID))";
+    int result = sqlite3_exec(db, sql, 0, 0, 0);
+    if (result != SQLITE_OK)
+    {
+        fprintf(stderr, "Error creating ActivityLog table: %s\n", sqlite3_errmsg(db));
+    }
+
+}
 
 void DisplayData(sqlite3 *db)
 {
@@ -77,9 +107,15 @@ void DisplayData(sqlite3 *db)
 void insertSampleData(sqlite3 *db){
     const char *sql = "INSERT INTO Users (Username, Password) VALUES ('admin', '@dm1n')";
     sqlite3_exec(db, sql, 0, 0, 0);
-    sql = "INSERT INTO Customers (UserID, FirstName, LastName, Address, Email, Phone) VALUES (1, 'adminul', 'adminescu', 'Piata Marasti, nr 13', 'admin@gmail.com', '0743217968')";
+    const char *sql = "INSERT INTO Customers (FirstName, LastName, Address, Email, Phone) VALUES ('adminul', 'adminescu', 'Piata Marasti, nr 13', 'admin@gmail.com', '0743217968')";
     sqlite3_exec(db, sql, 0, 0, 0);
     sql = "INSERT INTO FinancialTransactions (UserID, CustomerID, TransactionType, Amount, Date) VALUES (1, 1, 'Deposit', 1000, '2021-05-05')";
+    sqlite3_exec(db, sql, 0, 0, 0);
+    const char *sql = "INSERT INTO Accounts (UserID, AccountType, Balance) VALUES (5, 'Savings', 1000)";
+    sqlite3_exec(db, sql, 0, 0, 0);
+    sql = "INSERT INTO Accounts (UserID, AccountType, Balance) VALUES (5, 'Checking', 2000)";
+    sqlite3_exec(db, sql, 0, 0, 0);
+    sql = "INSERT INTO ActivityLog (AccountID, ActivityType, Amount, Date) VALUES (1, 'Deposit', 500, '2021-05-05')";
     sqlite3_exec(db, sql, 0, 0, 0);
 }
 
@@ -131,8 +167,10 @@ void sqlInit(){
     createUsersTable(db);
     createCustomersTable(db);
     createFinancialTransactionsTable(db);
+    createAccountTable(db);
+    createActivityLogTable(db);
 
-    // insertSampleData(db);
+    //insertSampleData(db);
 
     // Commit the transaction
     sqlite3_exec(db, "COMMIT", 0, 0, 0);

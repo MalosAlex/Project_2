@@ -5,6 +5,8 @@
 #include "/home/ghaster/Proiecte/Project_2/include/database.h"
 #include <sqlite3.h>
 
+int user_id = -1;
+
 int main(int argc, char *argv[])
 {
     sqlInit();

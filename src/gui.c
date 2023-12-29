@@ -42,6 +42,12 @@ GtkMenuItem *balance_view;
 GtkMenuItem *transactions_view;
 GtkMenuItem *activity_view;
 
+GtkDialog *view_dialog;
+GtkBox *view_box;
+GtkButtonBox *view_button_box;
+GtkButton *view_close;
+GtkTextView *view_text;
+
 
 void gui_init(void)
 {
@@ -93,7 +99,11 @@ void gui_init(void)
     transactions_view = GTK_MENU_ITEM(gtk_builder_get_object(builder,"transactions_view"));
     activity_view = GTK_MENU_ITEM(gtk_builder_get_object(builder,"activity_view"));
 
-
+    view_dialog = GTK_DIALOG(gtk_builder_get_object(builder,"view_dialog"));
+    view_box = GTK_BOX(gtk_builder_get_object(builder,"view_box"));
+    view_button_box = GTK_BUTTON_BOX(gtk_builder_get_object(builder,"view_button_box"));
+    view_close = GTK_BUTTON(gtk_builder_get_object(builder,"view_close"));
+    view_text = GTK_TEXT_VIEW(gtk_builder_get_object(builder,"view_text"));
 
     // Connect signals
     g_signal_connect(login_exit_button, "clicked", G_CALLBACK(on_login_exit_clicked), NULL);
@@ -107,7 +117,11 @@ void gui_init(void)
     // Main window
     g_signal_connect(main_sign_out, "activate", G_CALLBACK(sign_out), NULL);
     g_signal_connect(main_quit, "activate", G_CALLBACK(quit_main_menu), NULL);
-
+    g_signal_connect(accounts_view, "activate", G_CALLBACK(view_accounts), NULL);
+    g_signal_connect(balance_view, "activate", G_CALLBACK(view_balance), NULL);
+    g_signal_connect(transactions_view, "activate", G_CALLBACK(view_transactions), NULL);
+    g_signal_connect(activity_view, "activate", G_CALLBACK(view_activity), NULL);
+    g_signal_connect(view_close, "clicked", G_CALLBACK(hide_view), NULL);
 
 }
 

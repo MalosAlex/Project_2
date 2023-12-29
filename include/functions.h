@@ -13,4 +13,10 @@ gboolean check_register(GtkButton *button, gpointer user_data);
 
 void sign_out(GtkMenuItem *menuitem, gpointer user_data);
 void quit_main_menu(GtkMenuItem *menuitem, gpointer user_data);
+void view_accounts(GtkMenuItem *menuitem, gpointer user_data);
+void view_balance(GtkMenuItem *menuitem, gpointer user_data);
+void view_transactions(GtkMenuItem *menuitem, gpointer user_data);
+void view_activity(GtkMenuItem *menuitem, gpointer user_data);
+void hide_view(GtkButton *button, gpointer user_data);
+
 #endif

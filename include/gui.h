@@ -3,6 +3,8 @@
 
 #include <gtk/gtk.h>
 
+extern int user_id;
+
 // Window declarations
 extern GtkWindow *login_window;
 extern GtkWindow *main_window;
@@ -42,6 +44,11 @@ extern GtkMenuItem *balance_view;
 extern GtkMenuItem *transactions_view;
 extern GtkMenuItem *activity_view;
 
+extern GtkDialog *view_dialog;
+extern GtkBox *view_box;
+extern GtkButtonBox *view_button_box;
+extern GtkButton *view_close;
+extern GtkTextView *view_text;
 
 // Function declarations related to the GUI
 void gui_init(void);
