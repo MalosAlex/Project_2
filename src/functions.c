@@ -263,8 +263,6 @@ void quit_main_menu(GtkMenuItem *menuitem, gpointer user_data)
 
 void view_accounts(GtkMenuItem *menuitem, gpointer user_data)
 {
-    g_print("User ID: %d\n", user_id);
-
     if (view_text == NULL || view_dialog == NULL) {
         fprintf(stderr, "Invalid GTK widgets\n");
         return;
@@ -279,7 +277,6 @@ void view_accounts(GtkMenuItem *menuitem, gpointer user_data)
         exit(1);
     }
 
-    // Assume you have a GtkTextView named view_text and a GtkDialog named view_dialog
     GtkTextBuffer *buffer = gtk_text_view_get_buffer(view_text);
 
     sqlite3_stmt *stmt;
@@ -331,17 +328,247 @@ void view_accounts(GtkMenuItem *menuitem, gpointer user_data)
 
 void view_balance(GtkMenuItem *menuitem, gpointer user_data)
 {
-    // TODO
+    if (view_text == NULL || view_dialog == NULL)
+    {
+        fprintf(stderr, "Invalid GTK widgets\n");
+        return;
+    }
+
+    sqlite3 *db;
+    int rc = sqlite3_open("banking_app_database.db", &db);
+    if (rc != SQLITE_OK)
+    {
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        exit(1);
+    }
+
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(view_text);
+
+    // TODO Remember when inserting data to update the balance as well
+    sqlite3_stmt *stmt;
+    const char *sql = "SELECT AccountID, Balance FROM Accounts WHERE UserID = ?";
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error preparing statement\n");
+        sqlite3_close(db);
+        return;
+    }
+
+    // Bind parameters
+    if (sqlite3_bind_int(stmt, 1, user_id) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 1\n");
+        sqlite3_finalize(stmt);
+        sqlite3_close(db);
+        return;
+    }
+
+    // Execute the statement
+    int result;
+    int gen_balance = 0;
+    while ((result = sqlite3_step(stmt)) == SQLITE_ROW)
+    {
+        int col_count = sqlite3_column_count(stmt);
+        for (int i = 0; i < col_count; i++)
+        {
+            const char *column_name = (const char *)sqlite3_column_name(stmt, i);
+            const char *column_value = (const char *)sqlite3_column_text(stmt, i);
+
+            if (strcmp(column_name, "Balance") == 0)
+            {
+                gen_balance += atoi(column_value);
+            }
+            char column_info[256];
+            snprintf(column_info, sizeof(column_info), "%s: %s | ", column_name, column_value);
+            gtk_text_buffer_insert_at_cursor(buffer, column_info, -1);
+        }
+        gtk_text_buffer_insert_at_cursor(buffer, "\n", -1);
+    }
+    char column_info[256];
+    snprintf(column_info, sizeof(column_info), "General balance: %d", gen_balance);
+    gtk_text_buffer_insert_at_cursor(buffer, column_info, -1);
+    gtk_text_buffer_insert_at_cursor(buffer, "\n", -1);
+
+    // Finalize the statement
+    sqlite3_finalize(stmt);
+    // Close the database
+    sqlite3_close(db);
+
+    // Put the text buffer in the text view
+    gtk_text_view_set_buffer(view_text, buffer);
+    // Show the dialog
+    gtk_dialog_run(view_dialog);
 }
+
 
 void view_transactions(GtkMenuItem *menuitem, gpointer user_data)
 {
-    // TODO
+    if (view_text == NULL || view_dialog == NULL) {
+        fprintf(stderr, "Invalid GTK widgets\n");
+        return;
+    }
+
+    sqlite3 *db;
+    int rc = sqlite3_open("banking_app_database.db", &db);
+    if (rc != SQLITE_OK)
+    {
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        exit(1);
+    }
+
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(view_text);
+
+    sqlite3_stmt *stmt;
+    const char *sql = "SELECT * FROM FinancialTransactions WHERE UserID = ?";
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error preparing statement\n");
+        sqlite3_close(db);
+        return;
+    }
+
+    // Bind parameters
+    if (sqlite3_bind_int(stmt, 1, user_id) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 1\n");
+        sqlite3_finalize(stmt);
+        sqlite3_close(db);
+        return;
+    }
+
+    // Execute the statement
+    int result;
+    while ((result = sqlite3_step(stmt)) == SQLITE_ROW)
+    {
+        int col_count = sqlite3_column_count(stmt);
+        for (int i = 0; i < col_count; i++)
+        {
+            const char *column_name = (const char *)sqlite3_column_name(stmt, i);
+            const char *column_value = (const char *)sqlite3_column_text(stmt, i);
+
+            char column_info[256];
+            snprintf(column_info, sizeof(column_info), "%s: %s | ", column_name, column_value);
+            gtk_text_buffer_insert_at_cursor(buffer, column_info, -1);
+        }
+        gtk_text_buffer_insert_at_cursor(buffer, "\n", -1);
+    }
+
+    // Finalize the statement
+    sqlite3_finalize(stmt);
+    // Close the database
+    sqlite3_close(db);
+
+    // Put the text buffer in the text view
+    gtk_text_view_set_buffer(view_text, buffer);
+    // Show the dialog
+    gtk_dialog_run(view_dialog);
 }
 
 void view_activity(GtkMenuItem *menuitem, gpointer user_data)
 {
-    // TODO
+    if (view_text == NULL || view_dialog == NULL) {
+        fprintf(stderr, "Invalid GTK widgets\n");
+        return;
+    }
+
+    sqlite3 *db;
+    int rc = sqlite3_open("banking_app_database.db", &db);
+    if (rc != SQLITE_OK)
+    {
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        exit(1);
+    }
+
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(view_text);
+
+    sqlite3_stmt *stmt;
+    const char *sql = "SELECT AccountID FROM Accounts WHERE UserID = ?";
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error preparing statement\n");
+        sqlite3_close(db);
+        return;
+    }
+
+    // Bind parameters
+    if (sqlite3_bind_int(stmt, 1, user_id) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 1\n");
+        sqlite3_finalize(stmt);
+        sqlite3_close(db);
+        return;
+    }
+
+    // Execute the statement
+    int result;
+    while ((result = sqlite3_step(stmt)) == SQLITE_ROW)
+    {
+        int col_count = sqlite3_column_count(stmt);
+        for (int i = 0; i < col_count; i++)
+        {
+            const char *column_name = (const char *)sqlite3_column_name(stmt, i);
+            const char *column_value = (const char *)sqlite3_column_text(stmt, i);
+
+            char column_info[256];
+            snprintf(column_info, sizeof(column_info), "\n Activity for account %s: \n ", column_value);
+            gtk_text_buffer_insert_at_cursor(buffer, column_info, -1);
+
+            // We got all accounts, now we search for the account ID
+
+            sqlite3_stmt *stmt2;
+            const char *sql2 = "SELECT Date, ActivityType, Amount FROM ActivityLog WHERE AccountID = ?";
+            if (sqlite3_prepare_v2(db, sql2, -1, &stmt2, NULL) != SQLITE_OK)
+            {
+                fprintf(stderr, "Error preparing statement\n");
+                sqlite3_close(db);
+                return;
+            }
+
+            // Bind parameters
+            if (sqlite3_bind_int(stmt2, 1, atoi(column_value)) != SQLITE_OK)
+            {
+                fprintf(stderr, "Error binding parameter 1\n");
+                sqlite3_finalize(stmt2);
+                sqlite3_close(db);
+                return;
+            }
+
+            // Execute the statement
+            int result2;
+            while ((result2 = sqlite3_step(stmt2)) == SQLITE_ROW)
+            {
+                int col_count2 = sqlite3_column_count(stmt2);
+                for (int j = 0; j < col_count2; j++)
+                {
+                    const char *column_name2 = (const char *)sqlite3_column_name(stmt2, j);
+                    const char *column_value2 = (const char *)sqlite3_column_text(stmt2, j);
+
+                    char column_info2[256];
+                    snprintf(column_info2, sizeof(column_info2), "%s: %s | ", column_name2, column_value2);
+                    gtk_text_buffer_insert_at_cursor(buffer, column_info2, -1);
+                }
+                gtk_text_buffer_insert_at_cursor(buffer, "\n", -1);
+            }
+
+        }
+        gtk_text_buffer_insert_at_cursor(buffer, "\n", -1);
+    }
+
+    // Finalize the statement
+    sqlite3_finalize(stmt);
+    // Close the database
+    sqlite3_close(db);
+
+    // Put the text buffer in the text view
+    gtk_text_view_set_buffer(view_text, buffer);
+    // Show the dialog
+    gtk_dialog_run(view_dialog);
+
+    // TODO Remember to update the activity log when inserting data
+    // TODO Remember to make the activity log to search after account ID
 }
 
 void hide_view(GtkButton *button, gpointer user_data)

@@ -105,17 +105,17 @@ void DisplayData(sqlite3 *db)
 
 
 void insertSampleData(sqlite3 *db){
-    const char *sql = "INSERT INTO Users (Username, Password) VALUES ('admin', '@dm1n')";
-    sqlite3_exec(db, sql, 0, 0, 0);
-    const char *sql = "INSERT INTO Customers (FirstName, LastName, Address, Email, Phone) VALUES ('adminul', 'adminescu', 'Piata Marasti, nr 13', 'admin@gmail.com', '0743217968')";
-    sqlite3_exec(db, sql, 0, 0, 0);
-    sql = "INSERT INTO FinancialTransactions (UserID, CustomerID, TransactionType, Amount, Date) VALUES (1, 1, 'Deposit', 1000, '2021-05-05')";
-    sqlite3_exec(db, sql, 0, 0, 0);
-    const char *sql = "INSERT INTO Accounts (UserID, AccountType, Balance) VALUES (5, 'Savings', 1000)";
-    sqlite3_exec(db, sql, 0, 0, 0);
-    sql = "INSERT INTO Accounts (UserID, AccountType, Balance) VALUES (5, 'Checking', 2000)";
-    sqlite3_exec(db, sql, 0, 0, 0);
-    sql = "INSERT INTO ActivityLog (AccountID, ActivityType, Amount, Date) VALUES (1, 'Deposit', 500, '2021-05-05')";
+    // const char *sql = "INSERT INTO Users (Username, Password) VALUES ('admin', '@dm1n')";
+    // sqlite3_exec(db, sql, 0, 0, 0);
+    // const char *sql = "INSERT INTO Customers (FirstName, LastName, Address, Email, Phone) VALUES ('adminul', 'adminescu', 'Piata Marasti, nr 13', 'admin@gmail.com', '0743217968')";
+    // sqlite3_exec(db, sql, 0, 0, 0);
+    // const char *sql = "INSERT INTO FinancialTransactions (UserID, CustomerID, TransactionType, Amount, Date) VALUES (5, 1, 'Deposit', 1000, '2021-05-05')";
+    // sqlite3_exec(db, sql, 0, 0, 0);
+    // const char *sql = "INSERT INTO Accounts (UserID, AccountType, Balance) VALUES (5, 'Savings', 1000)";
+    // sqlite3_exec(db, sql, 0, 0, 0);
+    // sql = "INSERT INTO Accounts (UserID, AccountType, Balance) VALUES (5, 'Checking', 2000)";
+    // sqlite3_exec(db, sql, 0, 0, 0);
+    const char *sql = "INSERT INTO ActivityLog (AccountID, ActivityType, Amount, Date) VALUES (14, 'Deposit', 500, '2021-05-05')";
     sqlite3_exec(db, sql, 0, 0, 0);
 }
 
