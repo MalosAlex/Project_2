@@ -663,7 +663,8 @@ void validate_record(GtkEntry *entry, gpointer user_data)
     gboolean v3 = check_amount(record_amount_entry, NULL);
     gboolean v4 = check_date(record_date_entry, NULL);
     gboolean v5 = check_notes(record_notes_entry, NULL);
-    if (v1 == TRUE && v2 == TRUE && v3 == TRUE && v4 == TRUE && v5 == TRUE)
+    gboolean v6 = check_account(record_account_entry, NULL);
+    if (v1 == TRUE && v2 == TRUE && v3 == TRUE && v4 == TRUE && v5 == TRUE && v6 == TRUE)
     {
         gtk_widget_set_sensitive(GTK_WIDGET(record_submit), TRUE);
     }
@@ -730,7 +731,7 @@ gboolean check_amount(GtkEntry *entry, gpointer user_data)
     {
         for(int i = 0; i < strlen(amount); i++)
         {
-            if (amount[i] > '9' || amount[i] < '0')
+            if ((amount[i] > '9' || amount[i] < '0') && amount[i] != '.')
             {
                 gtk_label_set_text(record_error3, "Amount must be a number");
                 return FALSE;
@@ -854,5 +855,440 @@ gboolean check_notes(GtkEntry *entry, gpointer user_data)
     return TRUE;
 }
 
+gboolean check_account(GtkEntry *entry, gpointer user_data)
+{
+    const char *account = gtk_entry_get_text(entry);
+    if(strlen(account) > 5)
+    {
+        gtk_label_set_text(record_error6, "Account ID must be at most 5 characters long");
+        return FALSE;
+    }
+    else if(strlen(account) != 0)
+    {
+        for(int i = 0; i < strlen(account); i++)
+        {
+            if (account[i] > '9' || account[i] < '0')
+            {
+                gtk_label_set_text(record_error6, "Account ID must be a number");
+                return FALSE;
+            }
+        }
+    }
+    gtk_label_set_markup(record_error6, "<span font_desc='30'><b>✔</b></span>");
+    return TRUE;
+}
 
-// TODO: In the insert transaction, I also have to specify the account in which I am doing the transaction
+void insert_transaction(GtkButton *button, gpointer user_data)
+{
+    // First checking wether the account exists and has enough money
+    sqlite3 *db;
+    int rc = sqlite3_open("banking_app_database.db", &db);
+    if (rc != SQLITE_OK){
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        exit(1);
+    }
+    sqlite3_stmt *stmt;
+    const char *account = gtk_entry_get_text(record_account_entry);
+    // Make into int
+    int account_id = atoi(account);
+
+    const char *sql = "SELECT AccountID FROM Accounts WHERE UserID = ?";
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error preparing statement\n");
+        return;
+    }
+
+    // Bind parameters
+    if (sqlite3_bind_int(stmt, 1, user_id) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter !!1\n");
+        return;
+    }
+
+    // Execute the statement
+    int result;
+    int ok = 0;
+    while ((result = sqlite3_step(stmt)) == SQLITE_ROW)
+    {
+        int col_count = sqlite3_column_count(stmt);
+        for (int i = 0; i < col_count; i++)
+        {
+            const char *column_value = (const char *)sqlite3_column_text(stmt, i);
+            if (atoi(column_value) == account_id)
+            {
+                ok = 1;
+                break;
+            }
+        }
+    }
+
+    if (ok == 0)
+    {
+        // There is no row, so finalize the statement
+        sqlite3_finalize(stmt);
+        // Close the database
+        sqlite3_close(db);
+        // Display an error message
+        gtk_label_set_text(record_error6, "Account does not exist");
+        gtk_widget_set_sensitive(GTK_WIDGET(record_submit), FALSE);
+        return;
+    }
+    else
+    {
+        // There is a row, so finalize the statement
+        sqlite3_finalize(stmt);
+        // Close the database
+        sqlite3_close(db);
+    }
+
+    // Checking if there is a customer and if it exists
+    const char *customer = gtk_entry_get_text(record_customer_entry);
+    // Make into int
+    int customer_id = atoi(customer);
+
+    if (strlen(customer) != 0)
+    {
+        sqlite3 *db;
+        int rc = sqlite3_open("banking_app_database.db", &db);
+        if (rc != SQLITE_OK){
+            fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+            sqlite3_close(db);
+            exit(1);
+        }
+        sqlite3_stmt *stmt;
+        const char *sql = "SELECT CustomerID FROM Customers";
+        if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error preparing statement\n");
+            return;
+        }
+
+
+        // Execute the statement
+        int result;
+        int ok = 0;
+        while ((result = sqlite3_step(stmt)) == SQLITE_ROW)
+        {
+            int col_count = sqlite3_column_count(stmt);
+            for (int i = 0; i < col_count; i++)
+            {
+                const char *column_value = (const char *)sqlite3_column_text(stmt, i);
+                if (atoi(column_value) == customer_id)
+                {
+                    ok = 1;
+                    break;
+                }
+            }
+        }
+
+        if (ok == 0)
+        {
+            // There is no row, so finalize the statement
+            sqlite3_finalize(stmt);
+            // Close the database
+            sqlite3_close(db);
+            // Display an error message
+            gtk_label_set_text(record_error1, "Customer does not exist");
+            gtk_widget_set_sensitive(GTK_WIDGET(record_submit), FALSE);
+            return;
+        }
+        else
+        {
+            // There is a row, so finalize the statement
+            sqlite3_finalize(stmt);
+            // Close the database
+            sqlite3_close(db);
+        }
+    }
+    else
+    {
+        customer_id = -1;
+    }    
+
+    // Checking if the account has enough money
+
+    const char *type = gtk_entry_get_text(record_type_entry);
+    const char *amount = gtk_entry_get_text(record_amount_entry);
+    // Make into int
+    int amount_int = atoi(amount);
+    int balance = 0;
+
+    if(strcmp(type, "Withdrawal") == 0 || strcmp(type, "Transfer") == 0 || strcmp(type, "Payment") == 0)
+    {
+        sqlite3 *db;
+        int rc = sqlite3_open("banking_app_database.db", &db);
+        if (rc != SQLITE_OK){
+            fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+            sqlite3_close(db);
+            exit(1);
+        }
+        sqlite3_stmt *stmt;
+        const char *sql = "SELECT Balance FROM Accounts WHERE AccountID = ?";
+        if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error preparing statement\n");
+            return;
+        }
+
+        // Bind parameters
+        if (sqlite3_bind_int(stmt, 1, account_id) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error binding parameter 1\n");
+            return;
+        }
+
+        // Execute the statement
+        int result;
+        while ((result = sqlite3_step(stmt)) == SQLITE_ROW)
+        {
+            int col_count = sqlite3_column_count(stmt);
+            for (int i = 0; i < col_count; i++)
+            {
+                const char *column_value = (const char *)sqlite3_column_text(stmt, i);
+                balance = atof(column_value);
+            }
+        }
+
+        if (balance < amount_int)
+        {
+            // There is not enough money, so finalize the statement
+            sqlite3_finalize(stmt);
+            // Close the database
+            sqlite3_close(db);
+            // Display an error message
+            gtk_label_set_text(record_error3, "Account does not have enough money");
+            gtk_widget_set_sensitive(GTK_WIDGET(record_submit), FALSE);
+            return;
+        }
+        else
+        {
+            // There is enough money, so update the account balance
+            balance -= amount_int;
+        }
+    }
+    else
+    {
+        sqlite3 *db;
+        int rc = sqlite3_open("banking_app_database.db", &db);
+        if (rc != SQLITE_OK){
+            fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+            sqlite3_close(db);
+            exit(1);
+        }
+        sqlite3_stmt *stmt;
+        const char *sql = "SELECT Balance FROM Accounts WHERE AccountID = ?";
+        if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error preparing statement\n");
+            return;
+        }
+
+        // Bind parameters
+        if (sqlite3_bind_int(stmt, 1, account_id) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error binding parameter 1\n");
+            return;
+        }
+
+        // Execute the statement
+        int result;
+        while ((result = sqlite3_step(stmt)) == SQLITE_ROW)
+        {
+            int col_count = sqlite3_column_count(stmt);
+            for (int i = 0; i < col_count; i++)
+            {
+                const char *column_value = (const char *)sqlite3_column_text(stmt, i);
+                balance = atof(column_value);
+            }
+        }
+
+        balance += amount_int;
+    }
+
+    const char *date = gtk_entry_get_text(record_date_entry);
+    const char *notes = gtk_entry_get_text(record_notes_entry);
+
+    sqlite3_close(db);
+    // Insert the transaction into the database
+    insert_transaction_db(customer_id, account_id, type, amount_int, date, notes);
+
+    // Insert the operation into the activity log
+    insert_activity_db(account_id, type, amount_int);
+
+    // Clear the entries and the errors
+    gtk_entry_set_text(record_account_entry, "");
+    gtk_entry_set_text(record_customer_entry, "");
+    gtk_entry_set_text(record_type_entry, "");
+    gtk_entry_set_text(record_amount_entry, "");
+    gtk_entry_set_text(record_date_entry, "");
+    gtk_entry_set_text(record_notes_entry, "");
+    gtk_label_set_text(record_error1, "");
+    gtk_label_set_text(record_error2, "");
+    gtk_label_set_text(record_error3, "");
+    gtk_label_set_text(record_error4, "");
+    gtk_label_set_text(record_error5, "");
+    gtk_label_set_text(record_error6, "");
+
+    
+    // Update the balance in the database
+    sqlite3 *db2;
+    int rc2 = sqlite3_open("banking_app_database.db", &db2);
+    if (rc2 != SQLITE_OK){
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db2));
+        sqlite3_close(db2);
+        exit(1);
+    }
+    sqlite3_stmt *stmt2;
+    const char *sql2 = "UPDATE Accounts SET Balance = ? WHERE AccountID = ?";
+    if (sqlite3_prepare_v2(db2, sql2, -1, &stmt2, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error preparing statement\n");
+        return;
+    }
+
+    // Bind parameters
+    if (sqlite3_bind_int(stmt2, 1, balance) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 1\n");
+        return;
+    }
+
+    if (sqlite3_bind_int(stmt2, 2, account_id) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 2\n");
+        return;
+    }
+
+    // Execute the statement
+    sqlite3_step(stmt2);
+    
+
+}
+
+void insert_transaction_db(int customer_id, int account_id, const char *type, float amount, const char *date, const char *notes)
+{
+    fprintf(stderr, "Inserting transaction into database\n");
+    sqlite3 *db;
+    int rc = sqlite3_open("banking_app_database.db", &db);
+    if (rc != SQLITE_OK){
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        exit(1);
+    }
+    sqlite3_stmt *stmt;
+    const char *sql = "INSERT INTO FinancialTransactions (AccountID, CustomerID, TransactionType, Amount, Date, Notes) VALUES (?, ?, ?, ?, ?, ?)";
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error preparing statement\n");
+        return;
+    }
+
+    // Bind parameters
+    if (sqlite3_bind_int(stmt, 1, account_id) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 1\n");
+        return;
+    }
+
+    if (sqlite3_bind_int(stmt, 2, customer_id) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 2\n");
+        return;
+    }
+
+    if (sqlite3_bind_text(stmt, 3, type, -1, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 3\n");
+        return;
+    }
+
+    if (sqlite3_bind_int(stmt, 4, amount) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 4\n");
+        return;
+    }
+
+    if (sqlite3_bind_text(stmt, 5, date, -1, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 5\n");
+        return;
+    }
+
+    if (sqlite3_bind_text(stmt, 6, notes, -1, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 6\n");
+        return;
+    }
+
+    // Execute the statement
+    sqlite3_step(stmt);
+
+    // Finalize the statement
+    sqlite3_finalize(stmt);
+    // Close the database
+    sqlite3_close(db);
+}
+
+void insert_activity_db(int account_id, const char *type, int amount)
+{
+    fprintf(stderr, "Inserting activity into database\n");
+    sqlite3 *db;
+    int rc = sqlite3_open("banking_app_database.db", &db);
+    if (rc != SQLITE_OK){
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        exit(1);
+    }
+    sqlite3_stmt *stmt;
+    const char *sql = "INSERT INTO ActivityLog (AccountID, Date, ActivityType, Amount) VALUES (?, ?, ?, ?)";
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error preparing statement\n");
+        return;
+    }
+
+    // Bind parameters
+    if (sqlite3_bind_int(stmt, 1, account_id) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 1\n");
+        return;
+    }
+
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    char date[11];
+    snprintf(date, sizeof(date), "%d-%d-%d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
+
+    if (sqlite3_bind_text(stmt, 2, date, -1, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 2\n");
+        return;
+    }
+
+    if (sqlite3_bind_text(stmt, 3, type, -1, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 3\n");
+        return;
+    }
+
+    if (sqlite3_bind_int(stmt, 4, amount) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 4\n");
+        return;
+    }
+
+    // Execute the statement
+    sqlite3_step(stmt);
+
+    // Finalize the statement
+    sqlite3_finalize(stmt);
+    // Close the database
+    sqlite3_close(db);
+}
+
+
+
+// TODO implement when submiting transaction, instead of just customerID, to also be accountID, different than the first one and to check when submitting if transfer if 
+// customer exists and when transfering if account exists maybe

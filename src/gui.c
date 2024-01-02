@@ -66,6 +66,7 @@ GtkEntry *record_type_entry;
 GtkEntry *record_amount_entry;
 GtkEntry *record_date_entry;
 GtkEntry *record_notes_entry;
+GtkEntry *record_account_entry;
 GtkButton *record_exit;
 GtkButton *record_submit;
 GtkLabel *record_error1;
@@ -73,6 +74,7 @@ GtkLabel *record_error2;
 GtkLabel *record_error3;
 GtkLabel *record_error4;
 GtkLabel *record_error5;
+GtkLabel *record_error6;
 
 
 
@@ -150,6 +152,7 @@ void gui_init(void)
     record_amount_entry = GTK_ENTRY(gtk_builder_get_object(builder,"record_amount_entry"));
     record_date_entry = GTK_ENTRY(gtk_builder_get_object(builder,"record_date_entry"));
     record_notes_entry = GTK_ENTRY(gtk_builder_get_object(builder,"record_notes_entry"));
+    record_account_entry = GTK_ENTRY(gtk_builder_get_object(builder,"record_account_entry"));
     record_exit = GTK_BUTTON(gtk_builder_get_object(builder,"record_exit"));
     record_submit = GTK_BUTTON(gtk_builder_get_object(builder,"record_submit"));
     record_error1 = GTK_LABEL(gtk_builder_get_object(builder,"record_error1"));
@@ -157,6 +160,7 @@ void gui_init(void)
     record_error3 = GTK_LABEL(gtk_builder_get_object(builder,"record_error3"));
     record_error4 = GTK_LABEL(gtk_builder_get_object(builder,"record_error4"));
     record_error5 = GTK_LABEL(gtk_builder_get_object(builder,"record_error5"));
+    record_error6 = GTK_LABEL(gtk_builder_get_object(builder,"record_error6"));
 
 
     // Connect signals
@@ -188,7 +192,9 @@ void gui_init(void)
     g_signal_connect(G_OBJECT(record_amount_entry), "changed", G_CALLBACK(validate_record), NULL);
     g_signal_connect(G_OBJECT(record_date_entry), "changed", G_CALLBACK(validate_record), NULL);
     g_signal_connect(G_OBJECT(record_notes_entry), "changed", G_CALLBACK(validate_record), NULL);
+    g_signal_connect(G_OBJECT(record_account_entry), "changed", G_CALLBACK(validate_record), NULL);
     gtk_widget_set_sensitive(GTK_WIDGET(record_submit), FALSE);
+    g_signal_connect(record_submit, "clicked", G_CALLBACK(insert_transaction), NULL);
 
 
 }

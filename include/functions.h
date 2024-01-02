@@ -30,4 +30,8 @@ gboolean check_type(GtkEntry *entry, gpointer user_data);
 gboolean check_amount(GtkEntry *entry, gpointer user_data);
 gboolean check_date(GtkEntry *entry, gpointer user_data);
 gboolean check_notes(GtkEntry *entry, gpointer user_data);
+gboolean check_account(GtkEntry *entry, gpointer user_data);
+void insert_transaction(GtkButton *button, gpointer user_data);
+void insert_transaction_db(int customer_id, int account_id, const char *type, float amount, const char *date, const char *notes);
+void insert_activity_db(int account_id, const char *type, int amount);
 #endif

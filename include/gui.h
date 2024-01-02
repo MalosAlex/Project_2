@@ -69,6 +69,7 @@ extern GtkEntry *record_type_entry;
 extern GtkEntry *record_amount_entry;
 extern GtkEntry *record_date_entry;
 extern GtkEntry *record_notes_entry;
+extern GtkEntry *record_account_entry;
 extern GtkButton *record_exit;
 extern GtkButton *record_submit;
 extern GtkLabel *record_error1;
@@ -76,6 +77,7 @@ extern GtkLabel *record_error2;
 extern GtkLabel *record_error3;
 extern GtkLabel *record_error4;
 extern GtkLabel *record_error5;
+extern GtkLabel *record_error6;
 
 
 
