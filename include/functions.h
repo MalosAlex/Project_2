@@ -18,5 +18,16 @@ void view_balance(GtkMenuItem *menuitem, gpointer user_data);
 void view_transactions(GtkMenuItem *menuitem, gpointer user_data);
 void view_activity(GtkMenuItem *menuitem, gpointer user_data);
 void hide_view(GtkButton *button, gpointer user_data);
+void manage_accounts(GtkButton *button, gpointer user_data);
+void delete_account(GtkButton *button, gpointer user_data);
+void record_transactions(GtkButton *button, gpointer user_data);
+void manage_customer_data(GtkButton *button, gpointer user_data);
+void hide_record(GtkButton *button, gpointer user_data);
 
+void validate_record(GtkEntry *entry, gpointer user_data);
+gboolean check_customer(GtkEntry *entry, gpointer user_data);
+gboolean check_type(GtkEntry *entry, gpointer user_data);
+gboolean check_amount(GtkEntry *entry, gpointer user_data);
+gboolean check_date(GtkEntry *entry, gpointer user_data);
+gboolean check_notes(GtkEntry *entry, gpointer user_data);
 #endif

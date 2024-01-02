@@ -43,12 +43,41 @@ extern GtkMenuItem *accounts_view;
 extern GtkMenuItem *balance_view;
 extern GtkMenuItem *transactions_view;
 extern GtkMenuItem *activity_view;
+extern GtkMenuItem *financial_item;
+extern GtkMenu *financial_menu;
+extern GtkMenuItem *account_statement;
+extern GtkMenuItem *transactions_register;
+extern GtkMenuItem *expense_report;
+extern GtkButton *main_acc_manage;
+extern GtkButton *main_acc_delete;
+extern GtkButton *main_rec_transactions;
+extern GtkButton *main_cus_data_manage;
+
 
 extern GtkDialog *view_dialog;
 extern GtkBox *view_box;
 extern GtkButtonBox *view_button_box;
 extern GtkButton *view_close;
 extern GtkTextView *view_text;
+
+
+extern GtkWindow *record_window;
+extern GtkGrid *record_grid;
+extern GtkEntry *record_please_entry;
+extern GtkEntry *record_customer_entry;
+extern GtkEntry *record_type_entry;
+extern GtkEntry *record_amount_entry;
+extern GtkEntry *record_date_entry;
+extern GtkEntry *record_notes_entry;
+extern GtkButton *record_exit;
+extern GtkButton *record_submit;
+extern GtkLabel *record_error1;
+extern GtkLabel *record_error2;
+extern GtkLabel *record_error3;
+extern GtkLabel *record_error4;
+extern GtkLabel *record_error5;
+
+
 
 // Function declarations related to the GUI
 void gui_init(void);

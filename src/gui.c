@@ -41,12 +41,39 @@ GtkMenuItem *accounts_view;
 GtkMenuItem *balance_view;
 GtkMenuItem *transactions_view;
 GtkMenuItem *activity_view;
+GtkMenuItem *financial_item;
+GtkMenu *financial_menu;
+GtkMenuItem *account_statement;
+GtkMenuItem *transactions_register;
+GtkMenuItem *expense_report;
+GtkButton *main_acc_manage;
+GtkButton *main_acc_delete;
+GtkButton *main_rec_transactions;
+GtkButton *main_cus_data_manage;
+
 
 GtkDialog *view_dialog;
 GtkBox *view_box;
 GtkButtonBox *view_button_box;
 GtkButton *view_close;
 GtkTextView *view_text;
+
+
+GtkWindow *record_window;
+GtkGrid *record_grid;
+GtkEntry *record_customer_entry;
+GtkEntry *record_type_entry;
+GtkEntry *record_amount_entry;
+GtkEntry *record_date_entry;
+GtkEntry *record_notes_entry;
+GtkButton *record_exit;
+GtkButton *record_submit;
+GtkLabel *record_error1;
+GtkLabel *record_error2;
+GtkLabel *record_error3;
+GtkLabel *record_error4;
+GtkLabel *record_error5;
+
 
 
 void gui_init(void)
@@ -98,12 +125,39 @@ void gui_init(void)
     balance_view = GTK_MENU_ITEM(gtk_builder_get_object(builder,"balance_view"));
     transactions_view = GTK_MENU_ITEM(gtk_builder_get_object(builder,"transactions_view"));
     activity_view = GTK_MENU_ITEM(gtk_builder_get_object(builder,"activity_view"));
+    financial_item = GTK_MENU_ITEM(gtk_builder_get_object(builder,"financial_item"));
+    financial_menu = GTK_MENU(gtk_builder_get_object(builder,"financial_menu"));
+    account_statement = GTK_MENU_ITEM(gtk_builder_get_object(builder,"account_statement"));
+    transactions_register = GTK_MENU_ITEM(gtk_builder_get_object(builder,"transactions_register"));
+    expense_report = GTK_MENU_ITEM(gtk_builder_get_object(builder,"expense_report"));
+    main_acc_manage = GTK_BUTTON(gtk_builder_get_object(builder,"main_acc_manage"));
+    main_acc_delete = GTK_BUTTON(gtk_builder_get_object(builder,"main_acc_delete"));
+    main_rec_transactions = GTK_BUTTON(gtk_builder_get_object(builder,"main_rec_transactions"));
+    main_cus_data_manage = GTK_BUTTON(gtk_builder_get_object(builder,"main_cus_data_manage"));
+
 
     view_dialog = GTK_DIALOG(gtk_builder_get_object(builder,"view_dialog"));
     view_box = GTK_BOX(gtk_builder_get_object(builder,"view_box"));
     view_button_box = GTK_BUTTON_BOX(gtk_builder_get_object(builder,"view_button_box"));
     view_close = GTK_BUTTON(gtk_builder_get_object(builder,"view_close"));
     view_text = GTK_TEXT_VIEW(gtk_builder_get_object(builder,"view_text"));
+
+
+    record_window = GTK_WINDOW(gtk_builder_get_object(builder,"record_window"));
+    record_grid = GTK_GRID(gtk_builder_get_object(builder,"record_grid"));
+    record_customer_entry = GTK_ENTRY(gtk_builder_get_object(builder,"record_customer_entry"));
+    record_type_entry = GTK_ENTRY(gtk_builder_get_object(builder,"record_type_entry"));
+    record_amount_entry = GTK_ENTRY(gtk_builder_get_object(builder,"record_amount_entry"));
+    record_date_entry = GTK_ENTRY(gtk_builder_get_object(builder,"record_date_entry"));
+    record_notes_entry = GTK_ENTRY(gtk_builder_get_object(builder,"record_notes_entry"));
+    record_exit = GTK_BUTTON(gtk_builder_get_object(builder,"record_exit"));
+    record_submit = GTK_BUTTON(gtk_builder_get_object(builder,"record_submit"));
+    record_error1 = GTK_LABEL(gtk_builder_get_object(builder,"record_error1"));
+    record_error2 = GTK_LABEL(gtk_builder_get_object(builder,"record_error2"));
+    record_error3 = GTK_LABEL(gtk_builder_get_object(builder,"record_error3"));
+    record_error4 = GTK_LABEL(gtk_builder_get_object(builder,"record_error4"));
+    record_error5 = GTK_LABEL(gtk_builder_get_object(builder,"record_error5"));
+
 
     // Connect signals
     g_signal_connect(login_exit_button, "clicked", G_CALLBACK(on_login_exit_clicked), NULL);
@@ -122,6 +176,20 @@ void gui_init(void)
     g_signal_connect(transactions_view, "activate", G_CALLBACK(view_transactions), NULL);
     g_signal_connect(activity_view, "activate", G_CALLBACK(view_activity), NULL);
     g_signal_connect(view_close, "clicked", G_CALLBACK(hide_view), NULL);
+    g_signal_connect(main_acc_manage, "clicked", G_CALLBACK(manage_accounts), NULL);
+    g_signal_connect(main_acc_delete, "clicked", G_CALLBACK(delete_account), NULL);
+    g_signal_connect(main_rec_transactions, "clicked", G_CALLBACK(record_transactions), NULL);
+    g_signal_connect(main_cus_data_manage, "clicked", G_CALLBACK(manage_customer_data), NULL);
+
+    // Record window
+    g_signal_connect(record_exit, "clicked", G_CALLBACK(hide_record), NULL);
+    g_signal_connect(G_OBJECT(record_customer_entry), "changed", G_CALLBACK(validate_record), NULL);
+    g_signal_connect(G_OBJECT(record_type_entry), "changed", G_CALLBACK(validate_record), NULL);
+    g_signal_connect(G_OBJECT(record_amount_entry), "changed", G_CALLBACK(validate_record), NULL);
+    g_signal_connect(G_OBJECT(record_date_entry), "changed", G_CALLBACK(validate_record), NULL);
+    g_signal_connect(G_OBJECT(record_notes_entry), "changed", G_CALLBACK(validate_record), NULL);
+    gtk_widget_set_sensitive(GTK_WIDGET(record_submit), FALSE);
+
 
 }
 

@@ -34,12 +34,13 @@ void createCustomersTable(sqlite3 *db){
 void createFinancialTransactionsTable(sqlite3 *db){
     const char *sql = "CREATE TABLE IF NOT EXISTS FinancialTransactions ("
                       "TransactionID INTEGER PRIMARY KEY AUTOINCREMENT,"
-                      "UserID INTEGER NOT NULL,"
+                      "AccountID INTEGER NOT NULL,"
                       "CustomerID INTEGER ,"  // NULLABLE since we can have transactions without a customer
                       "TransactionType TEXT NOT NULL,"
                       "Amount REAL NOT NULL,"
                       "Date TEXT NOT NULL,"
-                      "FOREIGN KEY (UserID) REFERENCES Users(UserID),"
+                      "Notes TEXT,"
+                      "FOREIGN KEY (AccountID) REFERENCES Accounts(AccountID),"
                       "FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID))";
     int result = sqlite3_exec(db, sql, 0, 0, 0);
     if (result != SQLITE_OK) {
@@ -105,17 +106,17 @@ void DisplayData(sqlite3 *db)
 
 
 void insertSampleData(sqlite3 *db){
-    // const char *sql = "INSERT INTO Users (Username, Password) VALUES ('admin', '@dm1n')";
-    // sqlite3_exec(db, sql, 0, 0, 0);
-    // const char *sql = "INSERT INTO Customers (FirstName, LastName, Address, Email, Phone) VALUES ('adminul', 'adminescu', 'Piata Marasti, nr 13', 'admin@gmail.com', '0743217968')";
-    // sqlite3_exec(db, sql, 0, 0, 0);
-    // const char *sql = "INSERT INTO FinancialTransactions (UserID, CustomerID, TransactionType, Amount, Date) VALUES (5, 1, 'Deposit', 1000, '2021-05-05')";
-    // sqlite3_exec(db, sql, 0, 0, 0);
-    // const char *sql = "INSERT INTO Accounts (UserID, AccountType, Balance) VALUES (5, 'Savings', 1000)";
-    // sqlite3_exec(db, sql, 0, 0, 0);
-    // sql = "INSERT INTO Accounts (UserID, AccountType, Balance) VALUES (5, 'Checking', 2000)";
-    // sqlite3_exec(db, sql, 0, 0, 0);
-    const char *sql = "INSERT INTO ActivityLog (AccountID, ActivityType, Amount, Date) VALUES (14, 'Deposit', 500, '2021-05-05')";
+    const char *sql = "INSERT INTO Users (Username, Password) VALUES ('admin', '@dm1n')";
+    sqlite3_exec(db, sql, 0, 0, 0);
+    sql = "INSERT INTO Customers (FirstName, LastName, Address, Email, Phone) VALUES ('adminul', 'adminescu', 'Piata Marasti, nr 13', 'admin@gmail.com', '0743217968')";
+    sqlite3_exec(db, sql, 0, 0, 0);
+    sql = "INSERT INTO Accounts (UserID, AccountType, Balance) VALUES (1, 'Savings', 1000)";
+    sqlite3_exec(db, sql, 0, 0, 0);
+    sql = "INSERT INTO Accounts (UserID, AccountType, Balance) VALUES (1, 'Checking', 2000)";
+    sqlite3_exec(db, sql, 0, 0, 0);
+    sql = "INSERT INTO FinancialTransactions (AccountID, CustomerID, TransactionType, Amount, Date, Notes) VALUES (1, 1, 'Deposit', 1000, '2021-05-05', 'Initial deposit')";
+    sqlite3_exec(db, sql, 0, 0, 0);
+    sql = "INSERT INTO ActivityLog (AccountID, ActivityType, Amount, Date) VALUES (2, 'Deposit', 500, '2021-05-05')";
     sqlite3_exec(db, sql, 0, 0, 0);
 }
 
@@ -170,7 +171,7 @@ void sqlInit(){
     createAccountTable(db);
     createActivityLogTable(db);
 
-    //insertSampleData(db);
+    // insertSampleData(db);
 
     // Commit the transaction
     sqlite3_exec(db, "COMMIT", 0, 0, 0);
