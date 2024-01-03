@@ -41,6 +41,7 @@ GtkMenuItem *accounts_view;
 GtkMenuItem *balance_view;
 GtkMenuItem *transactions_view;
 GtkMenuItem *activity_view;
+GtkMenuItem *customers_view;
 GtkMenuItem *financial_item;
 GtkMenu *financial_menu;
 GtkMenuItem *account_statement;
@@ -99,6 +100,26 @@ GtkLabel *edit_error1;
 GtkLabel *edit_error2;  
 GtkLabel *edit_error3;
 
+
+GtkWindow *customer_window;
+GtkGrid *customer_grid;
+GtkButton *customer_cancel;
+GtkButton *customer_change;
+GtkButton *customer_create;
+GtkEntry *customer_id_entry;
+GtkEntry *customer_first_entry;
+GtkEntry *customer_last_entry;
+GtkEntry *customer_address_entry;
+GtkEntry *customer_email_entry;
+GtkEntry *customer_phone_entry;
+GtkLabel *customer_error1;
+GtkLabel *customer_error2;
+GtkLabel *customer_error3;
+GtkLabel *customer_error4;
+GtkLabel *customer_error5;
+GtkLabel *customer_error6;
+
+
 void gui_init(void)
 {
     // Login window
@@ -148,6 +169,7 @@ void gui_init(void)
     balance_view = GTK_MENU_ITEM(gtk_builder_get_object(builder,"balance_view"));
     transactions_view = GTK_MENU_ITEM(gtk_builder_get_object(builder,"transactions_view"));
     activity_view = GTK_MENU_ITEM(gtk_builder_get_object(builder,"activity_view"));
+    customers_view = GTK_MENU_ITEM(gtk_builder_get_object(builder,"customers_view"));
     financial_item = GTK_MENU_ITEM(gtk_builder_get_object(builder,"financial_item"));
     financial_menu = GTK_MENU(gtk_builder_get_object(builder,"financial_menu"));
     account_statement = GTK_MENU_ITEM(gtk_builder_get_object(builder,"account_statement"));
@@ -206,6 +228,26 @@ void gui_init(void)
     edit_error2 = GTK_LABEL(gtk_builder_get_object(builder,"edit_error2"));
     edit_error3 = GTK_LABEL(gtk_builder_get_object(builder,"edit_error3"));
 
+
+    customer_window = GTK_WINDOW(gtk_builder_get_object(builder,"customer_window"));
+    customer_grid = GTK_GRID(gtk_builder_get_object(builder,"customer_grid"));
+    customer_cancel = GTK_BUTTON(gtk_builder_get_object(builder,"customer_cancel"));
+    customer_change = GTK_BUTTON(gtk_builder_get_object(builder,"customer_change"));
+    customer_create = GTK_BUTTON(gtk_builder_get_object(builder,"customer_create"));
+    customer_id_entry = GTK_ENTRY(gtk_builder_get_object(builder,"customer_id_entry"));
+    customer_first_entry = GTK_ENTRY(gtk_builder_get_object(builder,"customer_first_entry"));
+    customer_last_entry = GTK_ENTRY(gtk_builder_get_object(builder,"customer_last_entry"));
+    customer_address_entry = GTK_ENTRY(gtk_builder_get_object(builder,"customer_address_entry"));
+    customer_email_entry = GTK_ENTRY(gtk_builder_get_object(builder,"customer_email_entry"));
+    customer_phone_entry = GTK_ENTRY(gtk_builder_get_object(builder,"customer_phone_entry"));
+    customer_error1 = GTK_LABEL(gtk_builder_get_object(builder,"customer_error1"));
+    customer_error2 = GTK_LABEL(gtk_builder_get_object(builder,"customer_error2"));
+    customer_error3 = GTK_LABEL(gtk_builder_get_object(builder,"customer_error3"));
+    customer_error4 = GTK_LABEL(gtk_builder_get_object(builder,"customer_error4"));
+    customer_error5 = GTK_LABEL(gtk_builder_get_object(builder,"customer_error5"));
+    customer_error6 = GTK_LABEL(gtk_builder_get_object(builder,"customer_error6"));
+    
+
     // Connect signals
     g_signal_connect(login_exit_button, "clicked", G_CALLBACK(on_login_exit_clicked), NULL);
     g_signal_connect(login_button, "clicked", G_CALLBACK(check_login), NULL);
@@ -222,6 +264,7 @@ void gui_init(void)
     g_signal_connect(balance_view, "activate", G_CALLBACK(view_balance), NULL);
     g_signal_connect(transactions_view, "activate", G_CALLBACK(view_transactions), NULL);
     g_signal_connect(activity_view, "activate", G_CALLBACK(view_activity), NULL);
+    g_signal_connect(customers_view, "activate", G_CALLBACK(view_customers), NULL);
     g_signal_connect(view_close, "clicked", G_CALLBACK(hide_view), NULL);
     g_signal_connect(main_acc_manage, "clicked", G_CALLBACK(manage_accounts), NULL);
     g_signal_connect(main_acc_delete, "clicked", G_CALLBACK(delete_account), NULL);
@@ -256,6 +299,18 @@ void gui_init(void)
     g_signal_connect(edit_submit, "clicked", G_CALLBACK(update_account), NULL);
     g_signal_connect(edit_delete, "clicked", G_CALLBACK(delete_account_edit), NULL);
 
+    // Customer window
+    g_signal_connect(customer_cancel, "clicked", G_CALLBACK(hide_customer), NULL);
+    g_signal_connect(customer_change, "clicked", G_CALLBACK(change_customer), NULL);
+    g_signal_connect(customer_create, "clicked", G_CALLBACK(create_customer), NULL);
+    g_signal_connect(G_OBJECT(customer_id_entry), "changed", G_CALLBACK(validate_customer), NULL);
+    g_signal_connect(G_OBJECT(customer_first_entry), "changed", G_CALLBACK(validate_customer), NULL);
+    g_signal_connect(G_OBJECT(customer_last_entry), "changed", G_CALLBACK(validate_customer), NULL);
+    g_signal_connect(G_OBJECT(customer_address_entry), "changed", G_CALLBACK(validate_customer), NULL);
+    g_signal_connect(G_OBJECT(customer_email_entry), "changed", G_CALLBACK(validate_customer), NULL);
+    g_signal_connect(G_OBJECT(customer_phone_entry), "changed", G_CALLBACK(validate_customer), NULL);
+    gtk_widget_set_sensitive(GTK_WIDGET(customer_change), FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(customer_create), FALSE);
 
 }
 

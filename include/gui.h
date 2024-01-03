@@ -43,6 +43,7 @@ extern GtkMenuItem *accounts_view;
 extern GtkMenuItem *balance_view;
 extern GtkMenuItem *transactions_view;
 extern GtkMenuItem *activity_view;
+extern GtkMenuItem *customers_view;
 extern GtkMenuItem *financial_item;
 extern GtkMenu *financial_menu;
 extern GtkMenuItem *account_statement;
@@ -102,6 +103,24 @@ extern GtkLabel *edit_error1;
 extern GtkLabel *edit_error2;
 extern GtkLabel *edit_error3;
 
+
+extern GtkWindow *customer_window;
+extern GtkGrid *customer_grid;
+extern GtkButton *customer_cancel;
+extern GtkButton *customer_change;
+extern GtkButton *customer_create;
+extern GtkEntry *customer_id_entry;
+extern GtkEntry *customer_first_entry;
+extern GtkEntry *customer_last_entry;
+extern GtkEntry *customer_address_entry;
+extern GtkEntry *customer_email_entry;
+extern GtkEntry *customer_phone_entry;
+extern GtkLabel *customer_error1;
+extern GtkLabel *customer_error2;
+extern GtkLabel *customer_error3;
+extern GtkLabel *customer_error4;
+extern GtkLabel *customer_error5;
+extern GtkLabel *customer_error6;
 
 
 // Function declarations related to the GUI

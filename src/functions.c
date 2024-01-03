@@ -635,8 +635,8 @@ void record_transactions(GtkButton *button, gpointer user_data)
 
 void manage_customer_data(GtkButton *button, gpointer user_data)
 {
-    g_print("Manage customer data\n");
-    // TODO Implement this function
+    gtk_widget_hide(GTK_WIDGET(main_window));
+    gtk_widget_show_all(GTK_WIDGET(customer_window));
 }
 
 void hide_record(GtkButton *button, gpointer user_data)
@@ -1888,6 +1888,331 @@ int delete_account_db(int account_id)
 
     return account_id;
 }
+
+void view_customers(GtkMenuItem *menuitem, gpointer user_data)
+{
+    // We first get the accounts, and for every account we get the customers by checking the transactions then we show them
+    // First we get the accounts
+    int processed_customers[101];
+    int l = 0;
+    sqlite3 *db1;
+    int rc1 = sqlite3_open("banking_app_database.db", &db1);
+    if (rc1 != SQLITE_OK){
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db1));
+        sqlite3_close(db1);
+        exit(1);
+    }
+
+    sqlite3_stmt *stmt1;
+    const char *sql1 = "SELECT AccountID FROM Accounts WHERE UserID = ?";
+
+    if (sqlite3_prepare_v2(db1, sql1, -1, &stmt1, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error preparing statement\n");
+        return;
+    }
+
+    // Bind parameters
+    if (sqlite3_bind_int(stmt1, 1, user_id) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 1\n");
+        return;
+    }
+
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(view_text);
+
+    // Execute the statement
+    int result1;
+    while((result1 = sqlite3_step(stmt1)) == SQLITE_ROW)
+    {
+        int col_count = sqlite3_column_count(stmt1);
+        for (int i = 0; i < col_count; i++)
+        {
+            const char *column_value = (const char *)sqlite3_column_text(stmt1, i);
+            int account_id = atoi(column_value);
+
+            // we specify the account
+            char column_info[256];
+            snprintf(column_info, sizeof(column_info), "\n Customers for account %s: \n ", column_value);
+            gtk_text_buffer_insert_at_cursor(buffer, column_info, -1);
+
+            // Now we get the customers
+            sqlite3 *db2;
+            int rc2 = sqlite3_open("banking_app_database.db", &db2);
+            if (rc2 != SQLITE_OK){
+                fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db2));
+                sqlite3_close(db2);
+                exit(1);
+            }
+
+            sqlite3_stmt *stmt2;
+            const char *sql2 = "SELECT CustomerID FROM FinancialTransactions WHERE AccountID = ?";
+
+            if (sqlite3_prepare_v2(db2, sql2, -1, &stmt2, NULL) != SQLITE_OK)
+            {
+                fprintf(stderr, "Error preparing statement\n");
+                return;
+            }
+
+            // Bind parameters
+            if (sqlite3_bind_int(stmt2, 1, account_id) != SQLITE_OK)
+            {
+                fprintf(stderr, "Error binding parameter 1\n");
+                return;
+            }
+
+            // Execute the statement
+            int result2;
+            while((result2 = sqlite3_step(stmt2)) == SQLITE_ROW)
+            {
+                int col_count2 = sqlite3_column_count(stmt2);
+                for (int j = 0; j < col_count2; j++)
+                {
+                    const char *column_value2 = (const char *)sqlite3_column_text(stmt2, i);
+                    int customer_id = atoi(column_value2);
+                    // We check if we already processed this customer
+                    int ok = 0;
+                    for (int k = 0; k <= l; k++)
+                    {
+                        if (processed_customers[k] == customer_id)
+                        {
+                            ok = 1;
+                        }
+                    }
+                    // Now we get the customer info
+                    if(ok == 0)
+                    {
+                        sqlite3 *db3;
+                        int rc3 = sqlite3_open("banking_app_database.db", &db3);
+                        if (rc3 != SQLITE_OK){
+                            fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db3));
+                            sqlite3_close(db3);
+                            exit(1);
+                        }
+
+                        sqlite3_stmt *stmt3;
+                        const char *sql3 = "SELECT * FROM Customers WHERE CustomerID = ?";
+
+                        if (sqlite3_prepare_v2(db3, sql3, -1, &stmt3, NULL) != SQLITE_OK)
+                        {
+                            fprintf(stderr, "Error preparing statement\n");
+                            return;
+                        }
+
+                        // Bind parameters
+                        if (sqlite3_bind_int(stmt3, 1, customer_id) != SQLITE_OK)
+                        {
+                            fprintf(stderr, "Error binding parameter 1\n");
+                            return;
+                        }
+
+                        // Execute the statement
+                        int result3;
+                        while((result3 = sqlite3_step(stmt3)) == SQLITE_ROW)
+                        {
+                            int col_count3 = sqlite3_column_count(stmt3);
+                            processed_customers[l] = customer_id;
+                            l++;
+                            for(int k = 0; k < col_count3; k++)
+                            {
+                                const char *column_name3 = (const char *)sqlite3_column_name(stmt3, k);
+                                const char *column_value3 = (const char *)sqlite3_column_text(stmt3, k);
+
+                                char column_info2[256];
+                                snprintf(column_info2, sizeof(column_info2), "%s: %s | ", column_name3, column_value3);
+                                gtk_text_buffer_insert_at_cursor(buffer, column_info2, -1);
+                            }
+                            gtk_text_buffer_insert_at_cursor(buffer, "\n", -1);
+                            // Put the text buffer in the text view
+                        }
+                    }
+                }
+            }
+        }
+    }
+    gtk_text_view_set_buffer(view_text, buffer);
+    // Show the dialog
+    gtk_dialog_run(view_dialog);    
+}
+
+void hide_customer(GtkButton *button, gpointer user_data)
+{
+    //Clear the text view and the errors
+    gtk_entry_set_text(customer_id_entry, "");
+    gtk_entry_set_text(customer_last_entry, "");
+    gtk_entry_set_text(customer_first_entry, "");
+    gtk_entry_set_text(customer_address_entry, "");
+    gtk_entry_set_text(customer_email_entry, "");
+    gtk_entry_set_text(customer_phone_entry, "");
+    gtk_label_set_text(customer_error1, "");
+    gtk_label_set_text(customer_error2, "");
+    gtk_label_set_text(customer_error3, "");
+    gtk_label_set_text(customer_error4, "");
+    gtk_label_set_text(customer_error5, "");
+    gtk_label_set_text(customer_error6, "");
+
+    gtk_widget_hide(GTK_WIDGET(customer_window));
+    gtk_widget_show_all(GTK_WIDGET(main_window));
+}
+
+void change_customer(GtkButton *button, gpointer user_data)
+{
+    // TODO Implement this function
+    g_print("Change customer\n");
+}
+
+void create_customer(GtkButton *button, gpointer user_data)
+{
+    const char *last = gtk_entry_get_text(customer_last_entry);
+    const char *first = gtk_entry_get_text(customer_first_entry);
+    const char *address = gtk_entry_get_text(customer_address_entry);
+    const char *email = gtk_entry_get_text(customer_email_entry);
+    const char *phone = gtk_entry_get_text(customer_phone_entry);
+
+    // Insert the customer into the database
+    create_customer_db(last, first, address, email, phone);
+
+    // We cant add to the audit this action cause the operation is done by the user not an account
+
+    // Clear the entries and the errors
+    gtk_entry_set_text(customer_id_entry, "");
+    gtk_entry_set_text(customer_last_entry, "");
+    gtk_entry_set_text(customer_first_entry, "");
+    gtk_entry_set_text(customer_address_entry, "");
+    gtk_entry_set_text(customer_email_entry, "");
+    gtk_entry_set_text(customer_phone_entry, "");
+    gtk_label_set_text(customer_error1, "");
+    gtk_label_set_text(customer_error2, "");
+    gtk_label_set_text(customer_error3, "");
+    gtk_label_set_text(customer_error4, "");
+    gtk_label_set_text(customer_error5, "");
+    gtk_label_set_text(customer_error6, "");
+}
+
+void create_customer_db(const char *last, const char *first, const char *address, const char *email, const char *phone)
+{
+    fprintf(stderr, "Inserting customer into database\n");
+    sqlite3 *db;
+    int rc = sqlite3_open("banking_app_database.db", &db);
+    if (rc != SQLITE_OK){
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        exit(1);
+    }
+    sqlite3_stmt *stmt;
+    const char *sql = "INSERT INTO Customers (LastName, FirstName, Address, Email, Phone) VALUES (?, ?, ?, ?, ?)";
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error preparing statement\n");
+        return;
+    }
+
+    // Bind parameters
+    if (sqlite3_bind_text(stmt, 1, last, -1, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 1\n");
+        return;
+    }
+
+    if (sqlite3_bind_text(stmt, 2, first, -1, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 2\n");
+        return;
+    }
+
+    if (sqlite3_bind_text(stmt, 3, address, -1, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 3\n");
+        return;
+    }
+
+    if (sqlite3_bind_text(stmt, 4, email, -1, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 4\n");
+        return;
+    }
+
+    if (sqlite3_bind_text(stmt, 5, phone, -1, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 5\n");
+        return;
+    }
+
+    // Execute the statement
+    sqlite3_step(stmt);
+
+    // Finalize the statement
+    sqlite3_finalize(stmt);
+
+    // Close the database
+    sqlite3_close(db);
+
+}
+
+void validate_customer(GtkEntry *entry, gpointer user_data)
+{
+    gboolean v1 = check_customer_id(customer_id_entry, NULL);
+    gboolean v2 = check_customer_last(customer_last_entry, NULL);
+    gboolean v3 = check_customer_first(customer_first_entry, NULL);
+    gboolean v4 = check_customer_address(customer_address_entry, NULL);
+    gboolean v5 = check_customer_email(customer_email_entry, NULL);
+    gboolean v6 = check_customer_phone(customer_phone_entry, NULL);
+    if (v2 == TRUE && v3 == TRUE && v4 == TRUE && v5 == TRUE && v6 == TRUE)
+    {
+        gtk_widget_set_sensitive(GTK_WIDGET(customer_create), TRUE);
+    }
+    else
+    {
+        gtk_widget_set_sensitive(GTK_WIDGET(customer_create), FALSE);
+    }
+    if (v1 == TRUE && (v2 == TRUE || v3 == TRUE || v4 == TRUE || v5 == TRUE || v6 == TRUE))
+    {
+        gtk_widget_set_sensitive(GTK_WIDGET(customer_change), TRUE);
+    }
+    else
+    {
+        gtk_widget_set_sensitive(GTK_WIDGET(customer_change), FALSE);
+    }
+}
+
+gboolean check_customer_id(GtkEntry *entry, gpointer user_data)
+{
+    //TODO Implement this function
+    return FALSE;
+}
+
+gboolean check_customer_last(GtkEntry *entry, gpointer user_data)
+{
+    //TODO Implement this function
+    return FALSE;
+}
+
+gboolean check_customer_first(GtkEntry *entry, gpointer user_data)
+{
+    //TODO Implement this function
+    return FALSE;
+}
+
+gboolean check_customer_address(GtkEntry *entry, gpointer user_data)
+{
+    //TODO Implement this function
+    return FALSE;
+}
+
+gboolean check_customer_email(GtkEntry *entry, gpointer user_data)
+{
+    //TODO Implement this function
+    return FALSE;
+}
+
+gboolean check_customer_phone(GtkEntry *entry, gpointer user_data)
+{
+    //TODO Implement this function
+    return FALSE;
+}
+
+
 // TODO implement when submiting transaction, instead of just customerID, to also be accountID, different than the first one and to check when submitting if transfer if 
 // customer exists and when transfering if account exists maybe
 // TODO Find out why balance isnt float and automatically eliminates everything after '.'
+// To think about: Should I make also an audit for the user, not just for his accounts, so I may record the creation of the customers and the deletion of accounts? But how?
