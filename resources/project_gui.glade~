@@ -140,11 +140,11 @@
     <property name="title" translatable="yes">Delete or Edit a Financial Account</property>
     <child>
       <!-- n-columns=3 n-rows=5 -->
-      <object class="GtkGrid">
+      <object class="GtkGrid" id="edit_grid">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <child>
-          <object class="GtkButton">
+          <object class="GtkButton" id="edit_exit">
             <property name="label" translatable="yes">Exit</property>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
@@ -156,7 +156,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton">
+          <object class="GtkButton" id="edit_delete">
             <property name="label" translatable="yes">Delete</property>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
@@ -168,7 +168,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton">
+          <object class="GtkButton" id="edit_submit">
             <property name="label" translatable="yes">Edit</property>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
@@ -180,7 +180,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="edit_account">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">AccountID</property>
@@ -191,7 +191,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="edit_please">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">Please insert the data. At least type or amount is necessary for Edit         </property>
@@ -203,7 +203,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="edit_errors">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">Errors   </property>
@@ -214,7 +214,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry">
+          <object class="GtkEntry" id="edit_account_entry">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
           </object>
@@ -224,7 +224,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry">
+          <object class="GtkEntry" id="edit_type_entry">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
           </object>
@@ -234,7 +234,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry">
+          <object class="GtkEntry" id="edit_balance_entry">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
           </object>
@@ -244,10 +244,9 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="edit_error1">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">label</property>
           </object>
           <packing>
             <property name="left-attach">2</property>
@@ -255,10 +254,9 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="edit_error2">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">label</property>
           </object>
           <packing>
             <property name="left-attach">2</property>
@@ -266,10 +264,9 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="edit_error3">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">label</property>
           </object>
           <packing>
             <property name="left-attach">2</property>
@@ -277,7 +274,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="edit_type">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">Type</property>
@@ -288,10 +285,10 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="edit_balance">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Amount</property>
+            <property name="label" translatable="yes">Balance</property>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -1002,6 +999,7 @@
   <object class="GtkDialog" id="view_dialog">
     <property name="name">Data Viewer</property>
     <property name="can-focus">False</property>
+    <property name="title" translatable="yes">View</property>
     <property name="type-hint">dialog</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="view_box">

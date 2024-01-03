@@ -41,4 +41,15 @@ gboolean check_acc_type(GtkEntry *entry, gpointer user_data);
 gboolean check_balance(GtkEntry *entry, gpointer user_data);
 void insert_account(GtkButton *button, gpointer user_data);
 int insert_account_db(const char *type, float balance);
+
+void hide_edit(GtkButton *button, gpointer user_data);
+void validate_edit(GtkEntry *entry, gpointer user_data);
+gboolean check_account_id(GtkEntry *entry, gpointer user_data);
+gboolean check_edit_acc_type(GtkEntry *entry, gpointer user_data);
+gboolean check_edit_balance(GtkEntry *entry, gpointer user_data);
+void update_account(GtkButton *button, gpointer user_data);
+int update_account_db(int account_id, const char *type, float balance);
+int delete_account_db(int account_id);
+void delete_account_edit(GtkButton *button, gpointer user_data);
+
 #endif

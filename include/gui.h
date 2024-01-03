@@ -90,6 +90,19 @@ extern GtkLabel *create_error1;
 extern GtkLabel *create_error2;
 
 
+extern GtkWindow *edit_window;
+extern GtkGrid *edit_grid;
+extern GtkEntry *edit_account_entry;
+extern GtkEntry *edit_type_entry;
+extern GtkEntry *edit_balance_entry;
+extern GtkButton *edit_exit;
+extern GtkButton *edit_submit;
+extern GtkButton *edit_delete;
+extern GtkLabel *edit_error1;
+extern GtkLabel *edit_error2;
+extern GtkLabel *edit_error3;
+
+
 
 // Function declarations related to the GUI
 void gui_init(void);

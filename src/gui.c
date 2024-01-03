@@ -87,6 +87,18 @@ GtkButton *create_cancel;
 GtkButton *create_submit;
 
 
+GtkWindow *edit_window;
+GtkGrid *edit_grid; 
+GtkEntry *edit_account_entry;
+GtkEntry *edit_type_entry;  
+GtkEntry *edit_balance_entry; 
+GtkButton *edit_exit;
+GtkButton *edit_submit; 
+GtkButton *edit_delete;  
+GtkLabel *edit_error1;
+GtkLabel *edit_error2;  
+GtkLabel *edit_error3;
+
 void gui_init(void)
 {
     // Login window
@@ -182,6 +194,18 @@ void gui_init(void)
     create_submit = GTK_BUTTON(gtk_builder_get_object(builder,"create_submit"));
 
 
+    edit_window = GTK_WINDOW(gtk_builder_get_object(builder,"edit_window"));
+    edit_grid = GTK_GRID(gtk_builder_get_object(builder,"edit_grid"));
+    edit_account_entry = GTK_ENTRY(gtk_builder_get_object(builder,"edit_account_entry"));
+    edit_type_entry = GTK_ENTRY(gtk_builder_get_object(builder,"edit_type_entry"));
+    edit_balance_entry = GTK_ENTRY(gtk_builder_get_object(builder,"edit_balance_entry"));
+    edit_exit = GTK_BUTTON(gtk_builder_get_object(builder,"edit_exit"));
+    edit_submit = GTK_BUTTON(gtk_builder_get_object(builder,"edit_submit"));
+    edit_delete = GTK_BUTTON(gtk_builder_get_object(builder,"edit_delete"));
+    edit_error1 = GTK_LABEL(gtk_builder_get_object(builder,"edit_error1"));
+    edit_error2 = GTK_LABEL(gtk_builder_get_object(builder,"edit_error2"));
+    edit_error3 = GTK_LABEL(gtk_builder_get_object(builder,"edit_error3"));
+
     // Connect signals
     g_signal_connect(login_exit_button, "clicked", G_CALLBACK(on_login_exit_clicked), NULL);
     g_signal_connect(login_button, "clicked", G_CALLBACK(check_login), NULL);
@@ -222,6 +246,15 @@ void gui_init(void)
     gtk_widget_set_sensitive(GTK_WIDGET(create_submit), FALSE);
     g_signal_connect(create_submit, "clicked", G_CALLBACK(insert_account), NULL);
 
+    // Edit window
+    g_signal_connect(edit_exit, "clicked", G_CALLBACK(hide_edit), NULL);
+    g_signal_connect(G_OBJECT(edit_account_entry), "changed", G_CALLBACK(validate_edit), NULL);
+    g_signal_connect(G_OBJECT(edit_type_entry), "changed", G_CALLBACK(validate_edit), NULL);
+    g_signal_connect(G_OBJECT(edit_balance_entry), "changed", G_CALLBACK(validate_edit), NULL);
+    gtk_widget_set_sensitive(GTK_WIDGET(edit_submit), FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(edit_delete), FALSE);
+    g_signal_connect(edit_submit, "clicked", G_CALLBACK(update_account), NULL);
+    g_signal_connect(edit_delete, "clicked", G_CALLBACK(delete_account_edit), NULL);
 
 
 }
