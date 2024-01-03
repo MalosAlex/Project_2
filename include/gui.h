@@ -80,6 +80,16 @@ extern GtkLabel *record_error5;
 extern GtkLabel *record_error6;
 
 
+extern GtkWindow *create_window;
+extern GtkGrid *create_grid;
+extern GtkEntry *create_type_entry;
+extern GtkEntry *create_balance_entry;
+extern GtkButton *create_cancel;
+extern GtkButton *create_submit;
+extern GtkLabel *create_error1;
+extern GtkLabel *create_error2;
+
+
 
 // Function declarations related to the GUI
 void gui_init(void);

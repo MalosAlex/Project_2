@@ -77,6 +77,15 @@ GtkLabel *record_error5;
 GtkLabel *record_error6;
 
 
+GtkWindow *create_window;
+GtkGrid *create_grid;
+GtkEntry *create_type_entry;
+GtkEntry *create_balance_entry;
+GtkLabel *create_error1;
+GtkLabel *create_error2;
+GtkButton *create_cancel;
+GtkButton *create_submit;
+
 
 void gui_init(void)
 {
@@ -163,6 +172,16 @@ void gui_init(void)
     record_error6 = GTK_LABEL(gtk_builder_get_object(builder,"record_error6"));
 
 
+    create_window = GTK_WINDOW(gtk_builder_get_object(builder,"create_window"));
+    create_grid = GTK_GRID(gtk_builder_get_object(builder,"create_grid"));
+    create_type_entry = GTK_ENTRY(gtk_builder_get_object(builder,"create_type_entry"));
+    create_balance_entry = GTK_ENTRY(gtk_builder_get_object(builder,"create_balance_entry"));
+    create_error1 = GTK_LABEL(gtk_builder_get_object(builder,"create_error1"));
+    create_error2 = GTK_LABEL(gtk_builder_get_object(builder,"create_error2"));
+    create_cancel = GTK_BUTTON(gtk_builder_get_object(builder,"create_cancel"));
+    create_submit = GTK_BUTTON(gtk_builder_get_object(builder,"create_submit"));
+
+
     // Connect signals
     g_signal_connect(login_exit_button, "clicked", G_CALLBACK(on_login_exit_clicked), NULL);
     g_signal_connect(login_button, "clicked", G_CALLBACK(check_login), NULL);
@@ -195,6 +214,14 @@ void gui_init(void)
     g_signal_connect(G_OBJECT(record_account_entry), "changed", G_CALLBACK(validate_record), NULL);
     gtk_widget_set_sensitive(GTK_WIDGET(record_submit), FALSE);
     g_signal_connect(record_submit, "clicked", G_CALLBACK(insert_transaction), NULL);
+
+    // Create window
+    g_signal_connect(create_cancel, "clicked", G_CALLBACK(hide_create), NULL);
+    g_signal_connect(G_OBJECT(create_type_entry), "changed", G_CALLBACK(validate_create), NULL);
+    g_signal_connect(G_OBJECT(create_balance_entry), "changed", G_CALLBACK(validate_create), NULL);
+    gtk_widget_set_sensitive(GTK_WIDGET(create_submit), FALSE);
+    g_signal_connect(create_submit, "clicked", G_CALLBACK(insert_account), NULL);
+
 
 
 }

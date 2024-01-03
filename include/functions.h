@@ -34,4 +34,11 @@ gboolean check_account(GtkEntry *entry, gpointer user_data);
 void insert_transaction(GtkButton *button, gpointer user_data);
 void insert_transaction_db(int customer_id, int account_id, const char *type, float amount, const char *date, const char *notes);
 void insert_activity_db(int account_id, const char *type, int amount);
+
+void hide_create(GtkButton *button, gpointer user_data);
+void validate_create(GtkEntry *entry, gpointer user_data);
+gboolean check_acc_type(GtkEntry *entry, gpointer user_data);
+gboolean check_balance(GtkEntry *entry, gpointer user_data);
+void insert_account(GtkButton *button, gpointer user_data);
+int insert_account_db(const char *type, float balance);
 #endif

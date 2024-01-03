@@ -617,8 +617,8 @@ void hide_view(GtkButton *button, gpointer user_data)
 
 void manage_accounts(GtkButton *button, gpointer user_data)
 {
-    g_print("Manage accounts\n");
-    // TODO Implement this function
+    gtk_widget_hide(GTK_WIDGET(main_window));
+    gtk_widget_show_all(GTK_WIDGET(create_window));
 }
 
 void delete_account(GtkButton *button, gpointer user_data)
@@ -1288,7 +1288,148 @@ void insert_activity_db(int account_id, const char *type, int amount)
     sqlite3_close(db);
 }
 
+void hide_create(GtkButton *button, gpointer user_data)
+{
+    //Clear the text view and the errors
+    gtk_entry_set_text(create_type_entry, "");
+    gtk_entry_set_text(create_balance_entry, "");
+    gtk_label_set_text(create_error1, "");
+    gtk_label_set_text(create_error2, "");
+
+    gtk_widget_hide(GTK_WIDGET(create_window));
+    gtk_widget_show_all(GTK_WIDGET(main_window));
+}
+
+void validate_create(GtkEntry *entry, gpointer user_data)
+{
+    gboolean v1 = check_acc_type(create_type_entry, NULL);
+    gboolean v2 = check_balance(create_balance_entry, NULL);
+    if (v1 == TRUE && v2 == TRUE)
+    {
+        gtk_widget_set_sensitive(GTK_WIDGET(create_submit), TRUE);
+    }
+    else
+    {
+        gtk_widget_set_sensitive(GTK_WIDGET(create_submit), FALSE);
+    }
+}
+
+gboolean check_acc_type(GtkEntry *entry, gpointer user_data)
+{
+    const char *type = gtk_entry_get_text(entry);
+    if(strlen(type) == 0 || strlen(type) > 20)
+    {
+        gtk_label_set_text(create_error1, "Please enter a valid type");
+        return FALSE;
+    }      
+    gtk_label_set_markup(create_error1, "<span font_desc='30'><b>✔</b></span>");
+    return TRUE;
+}
+
+gboolean check_balance(GtkEntry *entry, gpointer user_data)
+{
+    const char *balance = gtk_entry_get_text(entry);
+    if(strlen(balance) == 0)
+    {
+        gtk_label_set_text(create_error2, "Balance automatically set to 0");
+        return TRUE;
+    }
+    if(strlen(balance) > 9)
+    {
+        gtk_label_set_text(create_error2, "Please enter a valid balance");
+        return FALSE;
+    }
+    else
+    {
+        for(int i = 0; i < strlen(balance); i++)
+        {
+            if ((balance[i] > '9' || balance[i] < '0') && balance[i] != '.')
+            {
+                gtk_label_set_text(create_error2, "Balance must be a number");
+                return FALSE;
+            }
+        }
+        gtk_label_set_markup(create_error2, "<span font_desc='30'><b>✔</b></span>");
+        return TRUE;
+    }
+}
+
+void insert_account(GtkButton *button, gpointer user_data)
+{
+    const char *type = gtk_entry_get_text(create_type_entry);
+    const char *balance = gtk_entry_get_text(create_balance_entry);
+    // Make into float
+    if (strlen(balance) == 0)
+    {
+        balance = "0";
+    }
+    int balance_int = atof(balance);
+
+    // Insert the account into the database
+    int acc_id = insert_account_db(type, balance_int);
+
+    // Insert the operation into the activity log
+    if (acc_id != -1)
+        insert_activity_db(acc_id, "Account creation", balance_int);
 
 
+    // Clear the entries and the errors
+    gtk_entry_set_text(create_type_entry, "");
+    gtk_entry_set_text(create_balance_entry, "");
+    gtk_label_set_text(create_error1, "");
+    gtk_label_set_text(create_error2, "");
+}
+
+int insert_account_db(const char *type, float balance)
+{
+    sqlite3 *db;
+    int rc = sqlite3_open("banking_app_database.db", &db);
+    if (rc != SQLITE_OK){
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        exit(1);
+    }
+    sqlite3_stmt *stmt;
+    const char *sql = "INSERT INTO Accounts (UserID, AccountType, Balance) VALUES (?, ?, ?)";
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error preparing statement\n");
+        return -1;
+    }
+
+    // Bind parameters
+    if (sqlite3_bind_int(stmt, 1, user_id) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 1\n");
+        return -1;
+    }
+
+    if (sqlite3_bind_text(stmt, 2, type, -1, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 2\n");
+        return -1;
+    }
+
+    if (sqlite3_bind_int(stmt, 3, balance) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 3\n");
+        return -1;
+    }
+
+    // Execute the statement
+    sqlite3_step(stmt);
+
+    // Get the last inserted rowid (AccountID)
+    sqlite3_int64 accountID = sqlite3_last_insert_rowid(db);
+
+    // Finalize the statement
+    sqlite3_finalize(stmt);
+
+    // Close the database
+    sqlite3_close(db);
+
+    return accountID;
+
+}
 // TODO implement when submiting transaction, instead of just customerID, to also be accountID, different than the first one and to check when submitting if transfer if 
 // customer exists and when transfering if account exists maybe
