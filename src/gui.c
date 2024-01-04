@@ -120,6 +120,21 @@ GtkLabel *customer_error5;
 GtkLabel *customer_error6;
 
 
+GtkDialog *financial_dialog;
+GtkBox *financial_box;
+GtkButtonBox *financial_button_box;
+GtkButton *financial_close;
+GtkTreeView *financial_tree_view;
+GtkTreeSelection *financial_selection;
+GtkListStore *financial_list_store;
+GtkTreeViewColumn *date_column;
+GtkTreeViewColumn *client_column;
+GtkTreeViewColumn *account_column;
+GtkTreeViewColumn *type_column;
+GtkTreeViewColumn *description_column;
+GtkTreeViewColumn *amount_column;
+
+
 void gui_init(void)
 {
     // Login window
@@ -246,8 +261,54 @@ void gui_init(void)
     customer_error4 = GTK_LABEL(gtk_builder_get_object(builder,"customer_error4"));
     customer_error5 = GTK_LABEL(gtk_builder_get_object(builder,"customer_error5"));
     customer_error6 = GTK_LABEL(gtk_builder_get_object(builder,"customer_error6"));
-    
 
+
+    financial_dialog = GTK_DIALOG(gtk_builder_get_object(builder,"financial_dialog"));
+    financial_box = GTK_BOX(gtk_builder_get_object(builder,"financial_box"));
+    financial_button_box = GTK_BUTTON_BOX(gtk_builder_get_object(builder,"financial_button_box"));
+    financial_close = GTK_BUTTON(gtk_builder_get_object(builder,"financial_close"));
+    financial_tree_view = GTK_TREE_VIEW(gtk_builder_get_object(builder,"financial_tree_view"));
+    financial_selection = GTK_TREE_SELECTION(gtk_builder_get_object(builder,"financial_selection"));
+    financial_list_store = GTK_LIST_STORE(gtk_builder_get_object(builder,"financial_list_store"));
+    date_column = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder,"date_column"));
+    client_column = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder,"client_column"));
+    account_column = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder,"account_column"));
+    type_column = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder,"type_column"));
+    description_column = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder,"description_column"));
+    amount_column = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder,"amount_column"));
+
+    GtkCellRenderer *renderer;
+
+    // Date column
+    renderer = gtk_cell_renderer_text_new();
+    gtk_tree_view_column_pack_start(date_column, renderer, TRUE);
+    gtk_tree_view_column_add_attribute(date_column, renderer, "text", 0);
+
+    // Client column
+    renderer = gtk_cell_renderer_text_new();
+    gtk_tree_view_column_pack_start(client_column, renderer, TRUE);
+    gtk_tree_view_column_add_attribute(client_column, renderer, "text", 1);
+
+    // Account column
+    renderer = gtk_cell_renderer_text_new();
+    gtk_tree_view_column_pack_start(account_column, renderer, TRUE);
+    gtk_tree_view_column_add_attribute(account_column, renderer, "text", 2);
+
+    // Type column
+    renderer = gtk_cell_renderer_text_new();
+    gtk_tree_view_column_pack_start(type_column, renderer, TRUE);
+    gtk_tree_view_column_add_attribute(type_column, renderer, "text", 3);
+
+    // Description column
+    renderer = gtk_cell_renderer_text_new();
+    gtk_tree_view_column_pack_start(description_column, renderer, TRUE);
+    gtk_tree_view_column_add_attribute(description_column, renderer, "text", 4);
+
+    // Amount column
+    renderer = gtk_cell_renderer_text_new();
+    gtk_tree_view_column_pack_start(amount_column, renderer, TRUE);
+    gtk_tree_view_column_add_attribute(amount_column, renderer, "text", 5);
+    
     // Connect signals
     g_signal_connect(login_exit_button, "clicked", G_CALLBACK(on_login_exit_clicked), NULL);
     g_signal_connect(login_button, "clicked", G_CALLBACK(check_login), NULL);
@@ -270,6 +331,7 @@ void gui_init(void)
     g_signal_connect(main_acc_delete, "clicked", G_CALLBACK(delete_account), NULL);
     g_signal_connect(main_rec_transactions, "clicked", G_CALLBACK(record_transactions), NULL);
     g_signal_connect(main_cus_data_manage, "clicked", G_CALLBACK(manage_customer_data), NULL);
+    g_signal_connect(expense_report, "activate", G_CALLBACK(view_expense_report), NULL);
 
     // Record window
     g_signal_connect(record_exit, "clicked", G_CALLBACK(hide_record), NULL);
@@ -311,6 +373,9 @@ void gui_init(void)
     g_signal_connect(G_OBJECT(customer_phone_entry), "changed", G_CALLBACK(validate_customer), NULL);
     gtk_widget_set_sensitive(GTK_WIDGET(customer_change), FALSE);
     gtk_widget_set_sensitive(GTK_WIDGET(customer_create), FALSE);
+
+    // Financial dialog
+    g_signal_connect(financial_close, "clicked", G_CALLBACK(hide_financial), NULL);
 
 }
 

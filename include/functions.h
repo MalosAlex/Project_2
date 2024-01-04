@@ -55,7 +55,7 @@ void view_customers(GtkMenuItem *menuitem, gpointer user_data);
 void hide_customer(GtkButton *button, gpointer user_data);
 void change_customer(GtkButton *button, gpointer user_data);
 void create_customer(GtkButton *button, gpointer user_data);
-void create_customer_db(const char *first_name, const char *last_name, const char *address, const char *phone_number, const char *email);
+int create_customer_db(const char *first_name, const char *last_name, const char *address, const char *phone_number, const char *email);
 void validate_customer(GtkEntry *entry, gpointer user_data);
 gboolean check_customer_id(GtkEntry *entry, gpointer user_data);
 gboolean check_customer_last(GtkEntry *entry, gpointer user_data);
@@ -63,5 +63,7 @@ gboolean check_customer_first(GtkEntry *entry, gpointer user_data);
 gboolean check_customer_address(GtkEntry *entry, gpointer user_data);
 gboolean check_customer_phone(GtkEntry *entry, gpointer user_data);
 gboolean check_customer_email(GtkEntry *entry, gpointer user_data);
-
+void change_customer_db(int customer_id);
+void view_expense_report();
+void hide_financial(GtkButton *button, gpointer user_data);
 #endif

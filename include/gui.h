@@ -123,6 +123,20 @@ extern GtkLabel *customer_error5;
 extern GtkLabel *customer_error6;
 
 
+extern GtkDialog *financial_dialog;
+extern GtkBox *financial_box;
+extern GtkButtonBox *financial_button_box;
+extern GtkButton *financial_close;
+extern GtkTreeView *financial_tree_view;
+extern GtkTreeSelection *financial_selection;
+extern GtkListStore *financial_list_store;
+extern GtkTreeViewColumn *date_column;
+extern GtkTreeViewColumn *client_column;
+extern GtkTreeViewColumn *account_column;
+extern GtkTreeViewColumn *type_column;
+extern GtkTreeViewColumn *description_column;
+extern GtkTreeViewColumn *amount_column;
+
 // Function declarations related to the GUI
 void gui_init(void);
 

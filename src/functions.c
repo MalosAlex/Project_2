@@ -1,6 +1,7 @@
 // Path: src/functions.c
 #include "/home/ghaster/Proiecte/Project_2/include/functions.h"
 #include "/home/ghaster/Proiecte/Project_2/include/gui.h"  
+#include "/home/ghaster/Proiecte/Project_2/include/database.h"
 #include <stdio.h>
 #include <gtk/gtk.h>
 #include <string.h>
@@ -1110,6 +1111,16 @@ void insert_transaction(GtkButton *button, gpointer user_data)
     const char *date = gtk_entry_get_text(record_date_entry);
     const char *notes = gtk_entry_get_text(record_notes_entry);
 
+    if(strlen(date) == 0)
+    {
+        g_print("The current date will be used\n");
+        time_t t = time(NULL);
+        struct tm tm = *localtime(&t);
+        char date1[11];
+        snprintf(date1, sizeof(date1), "%d-%d-%d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
+        date = date1;
+    }
+
     sqlite3_close(db);
     // Insert the transaction into the database
     insert_transaction_db(customer_id, account_id, type, amount_int, date, notes);
@@ -2045,7 +2056,7 @@ void hide_customer(GtkButton *button, gpointer user_data)
     gtk_entry_set_text(customer_email_entry, "");
     gtk_entry_set_text(customer_phone_entry, "");
     gtk_label_set_text(customer_error1, "");
-    gtk_label_set_text(customer_error2, "");
+    gtk_label_set_text(customer_error3, "");
     gtk_label_set_text(customer_error3, "");
     gtk_label_set_text(customer_error4, "");
     gtk_label_set_text(customer_error5, "");
@@ -2057,22 +2068,72 @@ void hide_customer(GtkButton *button, gpointer user_data)
 
 void change_customer(GtkButton *button, gpointer user_data)
 {
-    // TODO Implement this function
-    g_print("Change customer\n");
-}
+    const char *cus_id = gtk_entry_get_text(customer_id_entry);
+    // Make into int
+    int customer_id = atoi(cus_id);
 
-void create_customer(GtkButton *button, gpointer user_data)
-{
-    const char *last = gtk_entry_get_text(customer_last_entry);
-    const char *first = gtk_entry_get_text(customer_first_entry);
-    const char *address = gtk_entry_get_text(customer_address_entry);
-    const char *email = gtk_entry_get_text(customer_email_entry);
-    const char *phone = gtk_entry_get_text(customer_phone_entry);
+    // First checking wether the customer exists
+    sqlite3 *db1;
+    int rc1 = sqlite3_open("banking_app_database.db", &db1);
+    if (rc1 != SQLITE_OK){
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db1));
+        sqlite3_close(db1);
+        exit(1);
+    }
 
-    // Insert the customer into the database
-    create_customer_db(last, first, address, email, phone);
+    sqlite3_stmt *stmt1;
+    const char *sql1 = "SELECT CustomerID FROM Customers WHERE CustomerID = ?";
+    if (sqlite3_prepare_v2(db1, sql1, -1, &stmt1, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error preparing statement\n");
+        return;
+    }
 
-    // We cant add to the audit this action cause the operation is done by the user not an account
+    // Bind parameters
+    if (sqlite3_bind_int(stmt1, 1, customer_id) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 1\n");
+        return;
+    }
+
+    // Execute the statement
+    int result1;
+    int ok = 0;
+    while ((result1 = sqlite3_step(stmt1)) == SQLITE_ROW)
+    {
+        int col_count = sqlite3_column_count(stmt1);
+        for (int i = 0; i < col_count; i++)
+        {
+            const char *column_value = (const char *)sqlite3_column_text(stmt1, i);
+            if (atoi(column_value) == customer_id)
+            {
+                ok = 1;
+                break;
+            }
+        }
+    }
+    if(ok == 0)
+    {
+        // There is no row, so finalize the statement
+        sqlite3_finalize(stmt1);
+        // Close the database
+        sqlite3_close(db1);
+        // Display an error message
+        gtk_label_set_text(customer_error1, "Customer does not exist");
+        gtk_widget_set_sensitive(GTK_WIDGET(customer_change), FALSE);
+        return;
+    }
+    else
+    {
+        // There is a row, so finalize the statement
+        sqlite3_finalize(stmt1);
+        // Close the database
+        sqlite3_close(db1);
+    }
+
+    // Now updating the customer with the 5 possible informations
+    // Change the customer into the database
+    change_customer_db(customer_id);
 
     // Clear the entries and the errors
     gtk_entry_set_text(customer_id_entry, "");
@@ -2089,7 +2150,37 @@ void create_customer(GtkButton *button, gpointer user_data)
     gtk_label_set_text(customer_error6, "");
 }
 
-void create_customer_db(const char *last, const char *first, const char *address, const char *email, const char *phone)
+void create_customer(GtkButton *button, gpointer user_data)
+{
+    const char *last = gtk_entry_get_text(customer_last_entry);
+    const char *first = gtk_entry_get_text(customer_first_entry);
+    const char *address = gtk_entry_get_text(customer_address_entry);
+    const char *email = gtk_entry_get_text(customer_email_entry);
+    const char *phone = gtk_entry_get_text(customer_phone_entry);
+
+    // Insert the customer into the database
+    int customer_id = create_customer_db(last, first, address, email, phone);
+
+    // We cant add to the audit this action cause the operation is done by the user not an account
+    // Create a string with the customer id
+    char customer_id_string[256];
+    snprintf(customer_id_string, sizeof(customer_id_string), "The customer has been created with ID: %d", customer_id);
+    // Clear the entries and the errors
+    gtk_entry_set_text(customer_id_entry, "");
+    gtk_entry_set_text(customer_last_entry, "");
+    gtk_entry_set_text(customer_first_entry, "");
+    gtk_entry_set_text(customer_address_entry, "");
+    gtk_entry_set_text(customer_email_entry, "");
+    gtk_entry_set_text(customer_phone_entry, "");
+    gtk_label_set_text(customer_error1, customer_id_string);
+    gtk_label_set_text(customer_error2, "");
+    gtk_label_set_text(customer_error3, "");
+    gtk_label_set_text(customer_error4, "");
+    gtk_label_set_text(customer_error5, "");
+    gtk_label_set_text(customer_error6, "");
+}
+
+int create_customer_db(const char *last, const char *first, const char *address, const char *email, const char *phone)
 {
     fprintf(stderr, "Inserting customer into database\n");
     sqlite3 *db;
@@ -2104,42 +2195,45 @@ void create_customer_db(const char *last, const char *first, const char *address
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
     {
         fprintf(stderr, "Error preparing statement\n");
-        return;
+        return -1;
     }
 
     // Bind parameters
     if (sqlite3_bind_text(stmt, 1, last, -1, NULL) != SQLITE_OK)
     {
         fprintf(stderr, "Error binding parameter 1\n");
-        return;
+        return -1;
     }
 
     if (sqlite3_bind_text(stmt, 2, first, -1, NULL) != SQLITE_OK)
     {
         fprintf(stderr, "Error binding parameter 2\n");
-        return;
+        return -1;
     }
 
     if (sqlite3_bind_text(stmt, 3, address, -1, NULL) != SQLITE_OK)
     {
         fprintf(stderr, "Error binding parameter 3\n");
-        return;
+        return -1;
     }
 
     if (sqlite3_bind_text(stmt, 4, email, -1, NULL) != SQLITE_OK)
     {
         fprintf(stderr, "Error binding parameter 4\n");
-        return;
+        return -1;
     }
 
     if (sqlite3_bind_text(stmt, 5, phone, -1, NULL) != SQLITE_OK)
     {
         fprintf(stderr, "Error binding parameter 5\n");
-        return;
+        return -1;
     }
 
     // Execute the statement
     sqlite3_step(stmt);
+
+    // Get the last inserted rowid (CustomerID)
+    sqlite3_int64 customerID = sqlite3_last_insert_rowid(db);
 
     // Finalize the statement
     sqlite3_finalize(stmt);
@@ -2147,6 +2241,7 @@ void create_customer_db(const char *last, const char *first, const char *address
     // Close the database
     sqlite3_close(db);
 
+    return customerID;
 }
 
 void validate_customer(GtkEntry *entry, gpointer user_data)
@@ -2177,42 +2272,483 @@ void validate_customer(GtkEntry *entry, gpointer user_data)
 
 gboolean check_customer_id(GtkEntry *entry, gpointer user_data)
 {
-    //TODO Implement this function
-    return FALSE;
+    if(strlen(gtk_entry_get_text(entry)) == 0)
+    {
+        gtk_label_set_text(customer_error1, "");
+        return FALSE;
+    }
+    const char *cus_id = gtk_entry_get_text(entry);
+    if(strlen(cus_id) > 5)
+    {
+        gtk_label_set_text(customer_error1, "Customer ID must be at most 5 characters long");
+        return FALSE;
+    }
+    else if(strlen(cus_id) != 0)
+    {
+        for(int i = 0; i < strlen(cus_id); i++)
+        {
+            if (cus_id[i] > '9' || cus_id[i] < '0')
+            {
+                gtk_label_set_text(customer_error1, "Customer ID must be a number");
+                return FALSE;
+            }
+        }
+    }
+    gtk_label_set_markup(customer_error1, "<span font_desc='30'><b>✔</b></span>");
+    return TRUE;
 }
 
 gboolean check_customer_last(GtkEntry *entry, gpointer user_data)
 {
-    //TODO Implement this function
-    return FALSE;
+    const char *last = gtk_entry_get_text(entry);
+    if(strlen(last) == 0)
+    {
+        gtk_label_set_text(customer_error3, "");
+        return FALSE;
+    }
+    if(strlen(last) > 20)
+    {
+        gtk_label_set_text(customer_error3, "Please enter a valid last name");
+        return FALSE;
+    }     
+    if(last[0]< 'A' || last[0] > 'Z')
+    {
+        gtk_label_set_text(customer_error3, "Last name must start with a capital letter");
+        return FALSE;
+    }
+    for(int i = 1; i < strlen(last); i++)
+    {
+        if(last[i] < 'a' || last[i] > 'z')
+        {
+            if(last[i] < 'A' || last[i] > 'Z') 
+            {
+                if (last[i] != ' ')
+                {
+                    gtk_label_set_text(customer_error3, "Last name must contain only letters");
+                    return FALSE;
+                }
+            }
+        }
+    }
+    gtk_label_set_markup(customer_error3, "<span font_desc='30'><b>✔</b></span>");
+    return TRUE;
 }
 
 gboolean check_customer_first(GtkEntry *entry, gpointer user_data)
 {
-    //TODO Implement this function
-    return FALSE;
+    const char *first = gtk_entry_get_text(entry);
+    if(strlen(first) == 0)
+    {
+        gtk_label_set_text(customer_error2, "");
+        return FALSE;
+    }
+    if(strlen(first) > 20)
+    {
+        gtk_label_set_text(customer_error2, "Please enter a valid first name");
+        return FALSE;
+    }     
+    if(first[0]< 'A' || first[0] > 'Z')
+    {
+        gtk_label_set_text(customer_error2, "First name must start with a capital letter");
+        return FALSE;
+    }
+    for(int i = 1; i < strlen(first); i++)
+    {
+        if(first[i] < 'a' || first[i] > 'z')
+        {
+            if(first[i] < 'A' || first[i] > 'Z') 
+            {
+                if (first[i] != ' ' && first[i] != '-')
+                {
+                    gtk_label_set_text(customer_error2, "First name must contain only letters");
+                    return FALSE;
+                }
+            }
+        }
+    }
+    gtk_label_set_markup(customer_error2, "<span font_desc='30'><b>✔</b></span>");
+    return TRUE;
 }
 
 gboolean check_customer_address(GtkEntry *entry, gpointer user_data)
 {
-    //TODO Implement this function
-    return FALSE;
+    const char *address = gtk_entry_get_text(entry);
+    if(strlen(address) == 0)
+    {
+        gtk_label_set_text(customer_error4, "");
+        return FALSE;
+    }
+    if(strlen(address) > 60)
+    {
+        gtk_label_set_text(customer_error4, "Please enter a shorter address");
+        return FALSE;
+    }     
+    gtk_label_set_markup(customer_error4, "<span font_desc='30'><b>✔</b></span>");
+    return TRUE;
 }
 
 gboolean check_customer_email(GtkEntry *entry, gpointer user_data)
 {
-    //TODO Implement this function
-    return FALSE;
+    const char *email = gtk_entry_get_text(entry);
+    if(strlen(email) == 0)
+    {
+        gtk_label_set_text(customer_error5, "");
+        return FALSE;
+    }
+    if(strlen(email) > 30)
+    {
+        gtk_label_set_text(customer_error5, "Please enter a shorter email");
+        return FALSE;
+    }
+    int ok = 0;
+    for(int i = 0; i < strlen(email); i++)
+    {
+        if(email[i] == '@')
+        {
+            ok = 1;
+            break;
+        }
+    }
+    if(ok == 0)
+    {
+        gtk_label_set_text(customer_error5, "Please enter a valid email");
+        return FALSE;
+    }     
+    gtk_label_set_markup(customer_error5, "<span font_desc='30'><b>✔</b></span>");
+    return TRUE;
 }
 
 gboolean check_customer_phone(GtkEntry *entry, gpointer user_data)
 {
-    //TODO Implement this function
-    return FALSE;
+    const char *phone = gtk_entry_get_text(entry);
+    if(strlen(phone) == 0)
+    {
+        gtk_label_set_text(customer_error6, "");
+        return FALSE;
+    }
+    if(strlen(phone) > 10)
+    {
+        gtk_label_set_text(customer_error6, "Please enter a valid phone number");
+        return FALSE;
+    }
+    for(int i = 0; i < strlen(phone); i++)
+    {
+        if (phone[i] > '9' || phone[i] < '0')
+        {
+            gtk_label_set_text(customer_error6, "Phone number must be a number");
+            return FALSE;
+        }
+    }
+    gtk_label_set_markup(customer_error6, "<span font_desc='30'><b>✔</b></span>");
+    return TRUE;
+}
+
+void change_customer_db(int customer_id)
+{
+    const char *first = gtk_entry_get_text(customer_first_entry);
+    const char *last = gtk_entry_get_text(customer_last_entry);
+    const char *address = gtk_entry_get_text(customer_address_entry);
+    const char *email = gtk_entry_get_text(customer_email_entry);
+    const char *phone = gtk_entry_get_text(customer_phone_entry);
+
+    if(strlen(first)!=0)
+    {
+        sqlite3 *db;
+        int rc = sqlite3_open("banking_app_database.db", &db);
+        if (rc != SQLITE_OK){
+            fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+            sqlite3_close(db);
+            exit(1);
+        }
+        sqlite3_stmt *stmt;
+        const char *sql = "UPDATE Customers SET FirstName = ? WHERE CustomerID = ?";
+        if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error preparing statement\n");
+            return;
+        }
+
+        // Bind parameters
+        if (sqlite3_bind_text(stmt, 1, first, -1, NULL) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error binding parameter 1\n");
+            return;
+        }
+
+        if (sqlite3_bind_int(stmt, 2, customer_id) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error binding parameter 2\n");
+            return;
+        }
+
+        // Execute the statement
+        sqlite3_step(stmt);
+
+        // Finalize the statement
+        sqlite3_finalize(stmt);
+
+        // Close the database
+        sqlite3_close(db);
+    }
+
+    if(strlen(last) != 0)
+    {
+        sqlite3 *db;
+        int rc = sqlite3_open("banking_app_database.db", &db);
+        if (rc != SQLITE_OK){
+            fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+            sqlite3_close(db);
+            exit(1);
+        }
+        sqlite3_stmt *stmt;
+        const char *sql = "UPDATE Customers SET LastName = ? WHERE CustomerID = ?";
+        if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error preparing statement\n");
+            return;
+        }
+
+        // Bind parameters
+        if (sqlite3_bind_text(stmt, 1, last, -1, NULL) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error binding parameter 1\n");
+            return;
+        }
+
+        if (sqlite3_bind_int(stmt, 2, customer_id) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error binding parameter 2\n");
+            return;
+        }
+
+        // Execute the statement
+        sqlite3_step(stmt);
+
+        // Finalize the statement
+        sqlite3_finalize(stmt);
+
+        // Close the database
+        sqlite3_close(db);
+    }
+
+    if(strlen(address) != 0)
+    {
+        sqlite3 *db;
+        int rc = sqlite3_open("banking_app_database.db", &db);
+        if (rc != SQLITE_OK){
+            fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+            sqlite3_close(db);
+            exit(1);
+        }
+        sqlite3_stmt *stmt;
+        const char *sql = "UPDATE Customers SET Address = ? WHERE CustomerID = ?";
+        if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error preparing statement\n");
+            return;
+        }
+
+        // Bind parameters
+        if (sqlite3_bind_text(stmt, 1, address, -1, NULL) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error binding parameter 1\n");
+            return;
+        }
+
+        if (sqlite3_bind_int(stmt, 2, customer_id) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error binding parameter 2\n");
+            return;
+        }
+
+        // Execute the statement
+        sqlite3_step(stmt);
+
+        // Finalize the statement
+        sqlite3_finalize(stmt);
+
+        // Close the database
+        sqlite3_close(db);
+    }
+
+    if(strlen(email) != 0)
+    {
+        sqlite3 *db;
+        int rc = sqlite3_open("banking_app_database.db", &db);
+        if (rc != SQLITE_OK){
+            fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+            sqlite3_close(db);
+            exit(1);
+        }
+        sqlite3_stmt *stmt;
+        const char *sql = "UPDATE Customers SET Email = ? WHERE CustomerID = ?";
+        if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error preparing statement\n");
+            return;
+        }
+
+        // Bind parameters
+        if (sqlite3_bind_text(stmt, 1, email, -1, NULL) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error binding parameter 1\n");
+            return;
+        }
+
+        if (sqlite3_bind_int(stmt, 2, customer_id) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error binding parameter 2\n");
+            return;
+        }
+
+        // Execute the statement
+        sqlite3_step(stmt);
+
+        // Finalize the statement
+        sqlite3_finalize(stmt);
+
+        // Close the database
+        sqlite3_close(db);
+    }
+
+    if(strlen(phone) != 0)
+    {
+        sqlite3 *db;
+        int rc = sqlite3_open("banking_app_database.db", &db);
+        if (rc != SQLITE_OK){
+            fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+            sqlite3_close(db);
+            exit(1);
+        }
+        sqlite3_stmt *stmt;
+        const char *sql = "UPDATE Customers SET Phone = ? WHERE CustomerID = ?";
+        if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error preparing statement\n");
+            return;
+        }
+
+        // Bind parameters
+        if (sqlite3_bind_text(stmt, 1, phone, -1, NULL) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error binding parameter 1\n");
+            return;
+        }
+
+        if (sqlite3_bind_int(stmt, 2, customer_id) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error binding parameter 2\n");
+            return;
+        }
+
+        // Execute the statement
+        sqlite3_step(stmt);
+
+        // Finalize the statement
+        sqlite3_finalize(stmt);
+
+        // Close the database
+        sqlite3_close(db);
+    
+    }
+}
+
+void view_expense_report()
+{
+    sqlite3 *db;
+    int rc = sqlite3_open("banking_app_database.db", &db);
+    if (rc != SQLITE_OK){
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        exit(1);
+    }
+
+    sqlite3_stmt *stmt;
+    const char *sql = "SELECT FT.Date,"
+                      "COALESCE(C.FirstName || ' ' || C.LastName, 'No Customer') AS CustomerName,"
+                      "A.AccountType,"
+                      "FT.TransactionType,"
+                      "FT.Notes,"
+                      "FT.Amount "
+                      "FROM FinancialTransactions FT "
+                      "JOIN Accounts A ON FT.AccountID = A.AccountID "
+                      "LEFT JOIN Customers C ON FT.CustomerID = C.CustomerID "
+                      "WHERE A.UserID = ? AND (FT.TransactionType = 'Payment' OR FT.TransactionType = 'Transfer' OR FT.TransactionType = 'Withdrawal')"
+                      "ORDER BY substr(FT.Date, 7, 4), substr(FT.Date, 4, 2), substr(FT.Date, 1, 2)";
+    
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error preparing statement: %s\n", sqlite3_errmsg(db));
+        return;
+    }
+    // Bind parameters
+    if (sqlite3_bind_int(stmt, 1, user_id) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 1\n");
+        return;
+    }
+
+    // This time we will use a tree view to display the data
+    financial_list_store = gtk_list_store_new(6, G_TYPE_STRING , G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+    GtkTreeIter iter;
+
+    // Execute the statement
+    int result;
+    int balance = 0;
+    while ((result = sqlite3_step(stmt)) == SQLITE_ROW)
+    {
+        // Get the data from the row
+        int col_count = sqlite3_column_count(stmt);
+        char *column_value[col_count];
+        for (int i = 0; i < col_count; i++)
+        {
+            column_value[i] = (char *)sqlite3_column_text(stmt, i);
+        }
+        balance = balance + atoi(column_value[5]);
+        // Add the data to the tree view
+        gtk_list_store_append(financial_list_store, &iter);
+        gtk_list_store_set(financial_list_store, &iter, 0, column_value[0], 1, column_value[1], 2, column_value[2], 3, column_value[3], 4, column_value[4], 5, column_value[5], -1);
+
+    }
+
+    //  Add the total balance, first making the balance a string
+    char balance_string[256];
+    snprintf(balance_string, sizeof(balance_string), "%d", balance);
+
+    gtk_list_store_append(financial_list_store, &iter);
+    gtk_list_store_set(financial_list_store, &iter, 0, " ", 1, " ", 2, " ", 3, " ", 4, "Total Expense", 5, balance_string, -1);
+    // Finalize the statement
+    sqlite3_finalize(stmt);
+
+    // Close the database
+    sqlite3_close(db);
+
+    // Create the tree view
+    gtk_tree_view_set_model(financial_tree_view, GTK_TREE_MODEL(financial_list_store));
+    g_object_unref(financial_list_store);
+
+    // Show the dialog
+    gtk_dialog_run(financial_dialog);
+}
+
+void hide_financial(GtkButton *button, gpointer user_data)
+{
+    gtk_widget_hide(GTK_WIDGET(financial_dialog));
+}
+
+void convert_date_format(const char *inputDate, char *outputDate)
+{
+    int day, month, year;
+    scanf(inputDate, "%d-%d-%d", &day, &month, &year);
+    snprintf(outputDate, 11, "%d-%d-%d", year, month, day);
 }
 
 
 // TODO implement when submiting transaction, instead of just customerID, to also be accountID, different than the first one and to check when submitting if transfer if 
 // customer exists and when transfering if account exists maybe
 // TODO Find out why balance isnt float and automatically eliminates everything after '.'
-// To think about: Should I make also an audit for the user, not just for his accounts, so I may record the creation of the customers and the deletion of accounts? But how?
+
+// To think about: Should I make also an audit for the user, not just for his accounts, so I may record the creation of the customers and the deletion of accounts? But how? 
+// ANSWER TO ABOVE: No, I should not, the project file states that I need to make an audit for the accounts, not for the user, so I will only record the operations done on the accounts
+
+// TODO Think of a way to make Last Name of First Name be the name in case of a company, maybe make one of the two be optional?

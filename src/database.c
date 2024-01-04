@@ -19,7 +19,7 @@ void createUsersTable(sqlite3 *db){
 
 void createCustomersTable(sqlite3 *db){
     const char *sql = "CREATE TABLE IF NOT EXISTS Customers ("
-                      "CustomerID INTEGER PRIMARY KEY AUTOINCREMENT,"
+                      "COALESCE(C.FirstName || ' ' || C.LastName, 'No Customer') AS CustomerName,"
                       "FirstName TEXT NOT NULL,"
                       "LastName TEXT NOT NULL,"
                       "Address TEXT NOT NULL,"
