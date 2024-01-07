@@ -19,7 +19,6 @@ void createUsersTable(sqlite3 *db){
 
 void createCustomersTable(sqlite3 *db){
     const char *sql = "CREATE TABLE IF NOT EXISTS Customers ("
-                      "COALESCE(C.FirstName || ' ' || C.LastName, 'No Customer') AS CustomerName,"
                       "FirstName TEXT NOT NULL,"
                       "LastName TEXT NOT NULL,"
                       "Address TEXT NOT NULL,"
@@ -176,7 +175,7 @@ void sqlInit(){
     // Commit the transaction
     sqlite3_exec(db, "COMMIT", 0, 0, 0);
 
-    DisplayData(db);
+    //DisplayData(db);
 
     sqlite3_close(db);
 }
