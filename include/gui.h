@@ -137,6 +137,16 @@ extern GtkTreeViewColumn *type_column;
 extern GtkTreeViewColumn *description_column;
 extern GtkTreeViewColumn *amount_column;
 
+extern GtkDialog *account_dialog;
+extern GtkBox *account_box;
+extern GtkButtonBox *account_button_box;
+extern GtkButton *account_show_button;
+extern GtkButton *account_close_button;
+extern GtkBox *account_entrybox;
+extern GtkLabel *account_entry_label;
+extern GtkEntry *account_entry_entry;
+extern GtkLabel *account_entry_error;
+
 // Function declarations related to the GUI
 void gui_init(void);
 

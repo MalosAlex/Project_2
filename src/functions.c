@@ -10,12 +10,18 @@
 
 void on_login_exit_clicked(GtkButton *button, gpointer user_data)
 {
+    /*
+    Close the login window and the application
+    */
     gtk_widget_hide(GTK_WIDGET(login_window));
     gtk_main_quit();
 }
 
 void validate_login(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    Check if the username and password entries are valid
+    */
     gboolean v1 = check_username(login_username_entry, NULL);
     gboolean v2 = check_password(login_password_entry, NULL);
     if (v1 == TRUE && v2 == TRUE)
@@ -32,7 +38,9 @@ void validate_login(GtkEntry *entry, gpointer user_data)
 
 gboolean check_username(GtkEntry *entry, gpointer user_data)
 {
-    
+    /*
+    Check if the username entry is valid
+    */
     const char *username = gtk_entry_get_text(entry);
 
     if (strlen(username) < 5)
@@ -60,6 +68,10 @@ gboolean check_username(GtkEntry *entry, gpointer user_data)
 
 gboolean check_password(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    Check if the password is correct, containing at least 5 characters, at most 20 characters, no spaces, 
+    only printable characters, at least one special character and at least one digit
+    */
     const char *password = gtk_entry_get_text(entry);
     const char *sp_chr = "@!#$^&*()-_=+[{]}|;:,<.>/?";
     const char *nr = "0123456789";
@@ -123,6 +135,9 @@ gboolean check_password(GtkEntry *entry, gpointer user_data)
 
 gboolean check_login(GtkButton *button, gpointer user_data)
 {
+    /* 
+    We check if the username and password are correct and if they are we hide the login window and show the main menu
+    */
     sqlite3 *db;
     int rc = sqlite3_open("banking_app_database.db", &db);
     if (rc != SQLITE_OK){
@@ -191,6 +206,9 @@ gboolean check_login(GtkButton *button, gpointer user_data)
 
 gboolean check_register(GtkButton *button, gpointer user_data)
 {
+    /*
+    We check if the username is correct and its new and if it is we insert the new user into the database
+    */
     sqlite3 *db;
     int rc = sqlite3_open("banking_app_database.db", &db);
     if (rc != SQLITE_OK){
@@ -251,6 +269,9 @@ gboolean check_register(GtkButton *button, gpointer user_data)
 
 void sign_out(GtkMenuItem *menuitem, gpointer user_data)
 {
+    /*
+    Exit the main window and go back to the login widget
+    */
     user_id = -1;
     gtk_widget_hide(GTK_WIDGET(main_window));
     gtk_widget_show_all(GTK_WIDGET(login_window));
@@ -258,12 +279,18 @@ void sign_out(GtkMenuItem *menuitem, gpointer user_data)
 
 void quit_main_menu(GtkMenuItem *menuitem, gpointer user_data)
 {
+    /*
+    Quit the main menu and the application
+    */
     gtk_widget_destroy(GTK_WIDGET(main_window));
     gtk_main_quit();
 }
 
 void view_accounts(GtkMenuItem *menuitem, gpointer user_data)
 {
+    /*
+    Shows a dialog with all the user's accounts
+    */
     if (view_text == NULL || view_dialog == NULL) {
         fprintf(stderr, "Invalid GTK widgets\n");
         return;
@@ -326,9 +353,11 @@ void view_accounts(GtkMenuItem *menuitem, gpointer user_data)
     gtk_dialog_run(view_dialog);
 }
 
-
 void view_balance(GtkMenuItem *menuitem, gpointer user_data)
 {
+    /*
+    Opens a dialog that shows every account's balance followed by the user's total balance
+    */
     if (view_text == NULL || view_dialog == NULL)
     {
         fprintf(stderr, "Invalid GTK widgets\n");
@@ -402,9 +431,11 @@ void view_balance(GtkMenuItem *menuitem, gpointer user_data)
     gtk_dialog_run(view_dialog);
 }
 
-
 void view_transactions(GtkMenuItem *menuitem, gpointer user_data)
 {
+    /*
+    Opnes a dialog that shows every transaction made by the user
+    */
     if (view_text == NULL || view_dialog == NULL) {
         fprintf(stderr, "Invalid GTK widgets\n");
         return;
@@ -507,6 +538,9 @@ void view_transactions(GtkMenuItem *menuitem, gpointer user_data)
 
 void view_activity(GtkMenuItem *menuitem, gpointer user_data)   
 {
+    /*
+    Opens a dialog that shows all the activity made by the user's accounts
+    */
     if (view_text == NULL || view_dialog == NULL) {
         fprintf(stderr, "Invalid GTK widgets\n");
         return;
@@ -611,6 +645,9 @@ void view_activity(GtkMenuItem *menuitem, gpointer user_data)
 
 void hide_view(GtkButton *button, gpointer user_data)
 {
+    /*
+    hides the dialog used by all the view functions
+    */
     //Clear the text view
     gtk_text_buffer_set_text(gtk_text_view_get_buffer(view_text), "", -1);
     gtk_widget_hide(GTK_WIDGET(view_dialog));
@@ -618,30 +655,45 @@ void hide_view(GtkButton *button, gpointer user_data)
 
 void manage_accounts(GtkButton *button, gpointer user_data)
 {
+    /*
+    Opens the window used to create accounts and hides the main window
+    */
     gtk_widget_hide(GTK_WIDGET(main_window));
     gtk_widget_show_all(GTK_WIDGET(create_window));
 }
 
 void delete_account(GtkButton *button, gpointer user_data)
 {
+    /*
+    Opens the window used to delete and edit accounts and hides the main window
+    */
     gtk_widget_hide(GTK_WIDGET(main_window));
     gtk_widget_show_all(GTK_WIDGET(edit_window));
 }
 
 void record_transactions(GtkButton *button, gpointer user_data)
 {
+    /*
+    Opens the window used to record transactions and hides the main window
+    */
     gtk_widget_hide(GTK_WIDGET(main_window));
     gtk_widget_show_all(GTK_WIDGET(record_window));
 }
 
 void manage_customer_data(GtkButton *button, gpointer user_data)
 {
+    /*
+    Opens the window used to manage customer data(create and edit) and hides the main window
+    */
     gtk_widget_hide(GTK_WIDGET(main_window));
     gtk_widget_show_all(GTK_WIDGET(customer_window));
 }
 
 void hide_record(GtkButton *button, gpointer user_data)
 {
+    /*
+    Hides the record window for transactions and shows the main window
+    */
     //Clear the text view and the errors
     gtk_entry_set_text(record_customer_entry, "");
     gtk_entry_set_text(record_type_entry, "");
@@ -659,6 +711,9 @@ void hide_record(GtkButton *button, gpointer user_data)
 
 void validate_record(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    Checks if all the entries are valid and if they are enables the submit button
+    */
     gboolean v1 = check_customer(record_customer_entry, NULL);
     gboolean v2 = check_type(record_type_entry, NULL);
     gboolean v3 = check_amount(record_amount_entry, NULL);
@@ -677,6 +732,9 @@ void validate_record(GtkEntry *entry, gpointer user_data)
 
 gboolean check_customer(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    Check if the type of transaction is Transfer or Payment and if it is we check if the customer ID is valid, and if it's not that type we check that the ID entry is empty
+    */
     const char *customer = gtk_entry_get_text(entry);
     const char *type = gtk_entry_get_text(record_type_entry);
     if((strcmp(type, "Transfer") == 0 || strcmp(type, "Payment") == 0) && strlen(customer) == 0)
@@ -711,6 +769,9 @@ gboolean check_customer(GtkEntry *entry, gpointer user_data)
 
 gboolean check_type(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    Checks if the type of transaction is among the 4 predefined types
+    */
     const char *type = gtk_entry_get_text(entry);
     if(strlen(type) == 0 || strlen(type) > 20)
     {
@@ -732,7 +793,9 @@ gboolean check_type(GtkEntry *entry, gpointer user_data)
 
 gboolean check_amount(GtkEntry *entry, gpointer user_data)
 {
-    // in the submit function we check that the account has enough money
+    /*
+    We check if the inserted amount is a valid integer or float number
+    */
     const char *amount = gtk_entry_get_text(entry);
     if(strlen(amount) == 0 || strlen(amount) > 9)
     {
@@ -756,6 +819,9 @@ gboolean check_amount(GtkEntry *entry, gpointer user_data)
 
 gboolean check_date(GtkEntry *entry, gpointer user_data)
 {
+    /* 
+    Checks if the date is valid, taking into consideration leap years and the number of days in each month. If the date is empty we will later use the current date
+    */
     const char *date = gtk_entry_get_text(entry);
     int year = 0;
     int month = 0;
@@ -765,7 +831,6 @@ gboolean check_date(GtkEntry *entry, gpointer user_data)
     if (strlen(date) == 0)
     {
         gtk_label_set_text(record_error4, "The curent date will be used");
-        // Remember to implement this in the submit function
         return TRUE;
     }
     else
@@ -857,6 +922,9 @@ gboolean check_date(GtkEntry *entry, gpointer user_data)
 
 gboolean check_notes(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    We check that the optional notes don't exceed the 100 characters limit
+    */
     const char *notes = gtk_entry_get_text(entry);
     if(strlen(notes) > 100)
     {
@@ -869,6 +937,9 @@ gboolean check_notes(GtkEntry *entry, gpointer user_data)
 
 gboolean check_account(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    We check that the account ID is a valid integer
+    */
     const char *account = gtk_entry_get_text(entry);
     if(strlen(account) > 5)
     {
@@ -892,6 +963,12 @@ gboolean check_account(GtkEntry *entry, gpointer user_data)
 
 void insert_transaction(GtkButton *button, gpointer user_data)
 {
+    /*
+    We check if the account exists, if the customer exists and if the account has enough money.
+    If everything is ok we insert the transaction into the database with another insert_transaction_db
+    After we insert the transaction we update the accounts' balance and the activity log
+    */
+
     // First checking wether the account exists and has enough money
     sqlite3 *db;
     int rc = sqlite3_open("banking_app_database.db", &db);
@@ -1340,12 +1417,19 @@ void insert_transaction(GtkButton *button, gpointer user_data)
     // Execute the statement
     sqlite3_step(stmt2);
     
-    
+    // Finalize the statement
+    sqlite3_finalize(stmt2);
+
+    // Close the database
+    sqlite3_close(db2);
 
 }
 
 void insert_transaction_db(int customer_id, int account_id, const char *type, float amount, const char *date, const char *notes)
 {
+    /*
+    We insert the transaction after it's checked into the database
+    */
     fprintf(stderr, "Inserting transaction into database\n");
     sqlite3 *db;
     int rc = sqlite3_open("banking_app_database.db", &db);
@@ -1410,6 +1494,9 @@ void insert_transaction_db(int customer_id, int account_id, const char *type, fl
 
 void insert_activity_db(int account_id, const char *type, int amount)
 {
+    /*
+    We insert the activity after it's checked into the database
+    */
     fprintf(stderr, "Inserting activity into database\n");
     sqlite3 *db;
     int rc = sqlite3_open("banking_app_database.db", &db);
@@ -1467,6 +1554,9 @@ void insert_activity_db(int account_id, const char *type, int amount)
 
 void hide_create(GtkButton *button, gpointer user_data)
 {
+    /*
+    Hide the create account window and show the main window
+    */
     //Clear the text view and the errors
     gtk_entry_set_text(create_type_entry, "");
     gtk_entry_set_text(create_balance_entry, "");
@@ -1479,6 +1569,9 @@ void hide_create(GtkButton *button, gpointer user_data)
 
 void validate_create(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    Calls the functions that check the type and the balance and if they are both valid it enables the submit button
+    */
     gboolean v1 = check_acc_type(create_type_entry, NULL);
     gboolean v2 = check_balance(create_balance_entry, NULL);
     if (v1 == TRUE && v2 == TRUE)
@@ -1493,6 +1586,9 @@ void validate_create(GtkEntry *entry, gpointer user_data)
 
 gboolean check_acc_type(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    We check that the account type is valid and that it doesn't contain spaces or numbers, and at least one letter
+    */
     const char *type = gtk_entry_get_text(entry);
     if(strlen(type) == 0 || strlen(type) > 20)
     {
@@ -1521,6 +1617,9 @@ gboolean check_acc_type(GtkEntry *entry, gpointer user_data)
 
 gboolean check_balance(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    We check if the balance is a valid integer or float number. If the entry is empty the balance is set to 0
+    */
     const char *balance = gtk_entry_get_text(entry);
     if(strlen(balance) == 0)
     {
@@ -1549,6 +1648,9 @@ gboolean check_balance(GtkEntry *entry, gpointer user_data)
 
 void insert_account(GtkButton *button, gpointer user_data)
 {
+    /*
+    Calls the function that inserts the account into the database and the function that inserts the operation into the activity log
+    */
     const char *type = gtk_entry_get_text(create_type_entry);
     const char *balance = gtk_entry_get_text(create_balance_entry);
     // Make into float
@@ -1575,6 +1677,9 @@ void insert_account(GtkButton *button, gpointer user_data)
 
 int insert_account_db(const char *type, float balance)
 {
+    /*
+    Creates the account in the database and returns the accountID
+    */
     sqlite3 *db;
     int rc = sqlite3_open("banking_app_database.db", &db);
     if (rc != SQLITE_OK){
@@ -1627,6 +1732,9 @@ int insert_account_db(const char *type, float balance)
 
 void hide_edit(GtkButton *button, gpointer user_data)
 {
+    /*
+    We hide the edit account window and show the main window
+    */
     //Clear the text view and the errors
     gtk_entry_set_text(edit_account_entry, "");
     gtk_entry_set_text(edit_type_entry, "");
@@ -1641,6 +1749,10 @@ void hide_edit(GtkButton *button, gpointer user_data)
 
 void validate_edit(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    Calls the functions that checks whether the account ID, the type and the balance are valid and if they are it enables the submit button
+    Also if the account ID is valid it enables the delete button
+    */
     gboolean v1 = check_edit_acc_type(edit_type_entry, NULL);
     gboolean v2 = check_edit_balance(edit_balance_entry, NULL);
     gboolean v3 = check_account_id(edit_account_entry, NULL);
@@ -1664,6 +1776,9 @@ void validate_edit(GtkEntry *entry, gpointer user_data)
 
 gboolean check_account_id(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    Checks if the account ID is a valid integer
+    */
     const char *account = gtk_entry_get_text(entry);
     if(strlen(account) == 0)
     {
@@ -1692,6 +1807,9 @@ gboolean check_account_id(GtkEntry *entry, gpointer user_data)
 
 gboolean check_edit_acc_type(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    We check that the account type is valid and that it doesn't contain spaces or numbers, and at least one letter
+    */
     const char *type = gtk_entry_get_text(entry);
     if(strlen(type) > 20)
     {
@@ -1720,6 +1838,9 @@ gboolean check_edit_acc_type(GtkEntry *entry, gpointer user_data)
 
 gboolean check_edit_balance(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    We check that the balance is a valid integer or float number. If the entry is empty the balance is set to 0
+    */
     const char *balance = gtk_entry_get_text(entry);
     if(strlen(balance) > 9)
     {
@@ -1743,6 +1864,10 @@ gboolean check_edit_balance(GtkEntry *entry, gpointer user_data)
 
 void update_account(GtkButton *button, gpointer user_data)
 {
+    /*
+    Checks if the account ID is valid and if the type or balance are valid
+    Calls the function that updates the account in the database and the function that inserts the operation into the activity log
+    */
     const char *account = gtk_entry_get_text(edit_account_entry);
     // Make into int
     int account_id = atoi(account);
@@ -1805,7 +1930,7 @@ void update_account(GtkButton *button, gpointer user_data)
         // Close the database
         sqlite3_close(db1);
     }
-    // Checking if there is a customer and if it exists
+    // Checking if the type and balance aren't both empty
     const char *type = gtk_entry_get_text(edit_type_entry);
     const char *balance = gtk_entry_get_text(edit_balance_entry);
     if (strlen(balance) == 0 && strlen(type) == 0)
@@ -1877,6 +2002,9 @@ void update_account(GtkButton *button, gpointer user_data)
 
 int update_account_db(int account_id, const char *type, float balance)
 {
+    /*
+    Updates the account in the database and returns the accountID
+    */
     fprintf(stderr, "Updating account in database\n");
     sqlite3 *db;
     int rc = sqlite3_open("banking_app_database.db", &db);
@@ -1986,6 +2114,9 @@ int update_account_db(int account_id, const char *type, float balance)
 
 void delete_account_edit(GtkButton *button, gpointer user_data)
 {
+    /*
+    Check if the account ID is valid and if it is it calls the function that deletes the account from the database 
+    */
     const char *account = gtk_entry_get_text(edit_account_entry);
     // Make into int
     int account_id = atoi(account);
@@ -2067,6 +2198,9 @@ void delete_account_edit(GtkButton *button, gpointer user_data)
 
 int delete_account_db(int account_id)
 {
+    /*
+    Deletes the account from the database
+    */
     fprintf(stderr, "Deleting account from database\n");
     sqlite3 *db;
     int rc = sqlite3_open("banking_app_database.db", &db);
@@ -2105,6 +2239,10 @@ int delete_account_db(int account_id)
 
 void view_customers(GtkMenuItem *menuitem, gpointer user_data)
 {
+    /*
+    Opens the same view dialog and shows all the customers affiliated with the user's account
+    */
+
     // We first get the accounts, and for every account we get the customers by checking the transactions then we show them
     // First we get the accounts
     int processed_customers[101];
@@ -2251,6 +2389,9 @@ void view_customers(GtkMenuItem *menuitem, gpointer user_data)
 
 void hide_customer(GtkButton *button, gpointer user_data)
 {
+    /*
+    Clears the customer manage window and hides it, opening the main widnow
+    */
     //Clear the text view and the errors
     gtk_entry_set_text(customer_id_entry, "");
     gtk_entry_set_text(customer_last_entry, "");
@@ -2271,6 +2412,9 @@ void hide_customer(GtkButton *button, gpointer user_data)
 
 void change_customer(GtkButton *button, gpointer user_data)
 {
+    /*
+    We check if the customer exists and if it does we call the function that changes the customer in the database
+    */
     const char *cus_id = gtk_entry_get_text(customer_id_entry);
     // Make into int
     int customer_id = atoi(cus_id);
@@ -2355,6 +2499,9 @@ void change_customer(GtkButton *button, gpointer user_data)
 
 void create_customer(GtkButton *button, gpointer user_data)
 {
+    /*
+    We call the create_customer_db with the 5 inputs, to create the customer, returning the ID
+    */
     const char *last = gtk_entry_get_text(customer_last_entry);
     const char *first = gtk_entry_get_text(customer_first_entry);
     const char *address = gtk_entry_get_text(customer_address_entry);
@@ -2385,6 +2532,9 @@ void create_customer(GtkButton *button, gpointer user_data)
 
 int create_customer_db(const char *last, const char *first, const char *address, const char *email, const char *phone)
 {
+    /*
+    Creates the customer in the database and returns the customerID
+    */
     fprintf(stderr, "Inserting customer into database\n");
     sqlite3 *db;
     int rc = sqlite3_open("banking_app_database.db", &db);
@@ -2449,6 +2599,11 @@ int create_customer_db(const char *last, const char *first, const char *address,
 
 void validate_customer(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    Calls the functions that check the data.
+    If the customer ID and at least one other entry are valid it enables the change button
+    If the 5 entries except the customer ID are valid it enables the create button
+    */
     gboolean v1 = check_customer_id(customer_id_entry, NULL);
     gboolean v2 = check_customer_last(customer_last_entry, NULL);
     gboolean v3 = check_customer_first(customer_first_entry, NULL);
@@ -2475,6 +2630,9 @@ void validate_customer(GtkEntry *entry, gpointer user_data)
 
 gboolean check_customer_id(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    Checks if the customer ID is a valid integer
+    */
     if(strlen(gtk_entry_get_text(entry)) == 0)
     {
         gtk_label_set_text(customer_error1, "");
@@ -2503,6 +2661,9 @@ gboolean check_customer_id(GtkEntry *entry, gpointer user_data)
 
 gboolean check_customer_last(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    Checks if the last name is valid and if it doesn't contain numbers, and at least one Capital Letter
+    */
     const char *last = gtk_entry_get_text(entry);
     if(strlen(last) == 0)
     {
@@ -2539,6 +2700,9 @@ gboolean check_customer_last(GtkEntry *entry, gpointer user_data)
 
 gboolean check_customer_first(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    Checks if the First name is valid and if it doesn't contain numbers, and at least one Capital Letter
+    */
     const char *first = gtk_entry_get_text(entry);
     if(strlen(first) == 0)
     {
@@ -2575,6 +2739,9 @@ gboolean check_customer_first(GtkEntry *entry, gpointer user_data)
 
 gboolean check_customer_address(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    Checks if the address isn't too long
+    */
     const char *address = gtk_entry_get_text(entry);
     if(strlen(address) == 0)
     {
@@ -2592,6 +2759,9 @@ gboolean check_customer_address(GtkEntry *entry, gpointer user_data)
 
 gboolean check_customer_email(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    Checks if the email is valid and if it contains an @
+    */
     const char *email = gtk_entry_get_text(entry);
     if(strlen(email) == 0)
     {
@@ -2623,6 +2793,9 @@ gboolean check_customer_email(GtkEntry *entry, gpointer user_data)
 
 gboolean check_customer_phone(GtkEntry *entry, gpointer user_data)
 {
+    /*
+    Checks if the phone number contains only numbers and is at max 10 characters long
+    */
     const char *phone = gtk_entry_get_text(entry);
     if(strlen(phone) == 0)
     {
@@ -2648,6 +2821,9 @@ gboolean check_customer_phone(GtkEntry *entry, gpointer user_data)
 
 void change_customer_db(int customer_id)
 {
+    /*
+    Changes all 5 entries in the database, if they are not empty
+    */
     const char *first = gtk_entry_get_text(customer_first_entry);
     const char *last = gtk_entry_get_text(customer_last_entry);
     const char *address = gtk_entry_get_text(customer_address_entry);
@@ -2858,6 +3034,9 @@ void change_customer_db(int customer_id)
 
 void view_expense_report()
 {
+    /*
+    Shows the expense report for the user
+    */
     sqlite3 *db;
     int rc = sqlite3_open("banking_app_database.db", &db);
     if (rc != SQLITE_OK){
@@ -2936,16 +3115,235 @@ void view_expense_report()
 
 void hide_financial(GtkButton *button, gpointer user_data)
 {
+    /*
+    Hides the dialog that contains the financial reports
+    */
+    // Clear the tree view
+    gtk_tree_view_set_model(financial_tree_view, NULL);
+    // Hide the dialog
     gtk_widget_hide(GTK_WIDGET(financial_dialog));
 }
 
-void convert_date_format(const char *inputDate, char *outputDate)
+void show_account(GtkButton *button, gpointer user_data)
 {
-    int day, month, year;
-    scanf(inputDate, "%d-%d-%d", &day, &month, &year);
-    snprintf(outputDate, 11, "%d-%d-%d", year, month, day);
+    /*
+    Shows the dialog in which you insert the account
+    */
+    gtk_widget_show_all(GTK_WIDGET(account_dialog));
 }
 
+void hide_account(GtkButton *button, gpointer user_data)
+{
+    /*
+    Hides the dialog in which you insert the account
+    */
+    // Clear the entry and the error
+    gtk_entry_set_text(account_entry_entry, "");
+    gtk_label_set_text(account_entry_error, "");
+    gtk_widget_hide(GTK_WIDGET(account_dialog));
+}
+
+void show_statement(GtkButton *button, gpointer user_data)
+{
+    // We first check whether the accountID is valid
+    const char *acc_id = gtk_entry_get_text(account_entry_entry);
+    for (int i = 0; i < strlen(acc_id); i++)
+    {
+        if (acc_id[i] > '9' || acc_id[i] < '0')
+        {
+            gtk_label_set_text(account_entry_error, "Account ID must be a number");
+            return;
+        }
+    }
+    if (strlen(acc_id) > 5)
+    {
+        gtk_label_set_text(account_entry_error, "Account ID must be at most 5 characters long");
+        return;
+    }
+    int account_id = atoi(acc_id);
+
+    // First checking wether the account exists for this user
+    sqlite3 *db1;
+    int rc1 = sqlite3_open("banking_app_database.db", &db1);
+    if (rc1 != SQLITE_OK){
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db1));
+        sqlite3_close(db1);
+        exit(1);
+    }
+
+    sqlite3_stmt *stmt1;
+    const char *sql1 = "SELECT AccountID FROM Accounts WHERE UserID = ?";
+    if (sqlite3_prepare_v2(db1, sql1, -1, &stmt1, NULL) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error preparing statement hdhashd\n");
+        return;
+    }
+
+    // Bind parameters
+    if (sqlite3_bind_int(stmt1, 1, user_id) != SQLITE_OK)
+    {
+        fprintf(stderr, "Error binding parameter 1\n");
+        return;
+    }
+
+    // Execute the statement
+    int result1;
+    int ok = 0;
+    while ((result1 = sqlite3_step(stmt1)) == SQLITE_ROW)
+    {
+        int col_count = sqlite3_column_count(stmt1);
+        for (int i = 0; i < col_count; i++)
+        {
+            const char *column_value = (const char *)sqlite3_column_text(stmt1, i);
+            if (atoi(column_value) == account_id)
+            {
+                ok = 1;
+                break;
+            }
+        }
+    }
+    if(ok == 0)
+    {
+        // There is no row, so finalize the statement
+        sqlite3_finalize(stmt1);
+        // Close the database
+        sqlite3_close(db1);
+        // Display an error message
+        gtk_label_set_text(account_entry_error, "Account does not exist");
+        return;
+    }
+    else
+    {
+        // There is a row, so finalize the statement
+        sqlite3_finalize(stmt1);
+        // Close the database
+        sqlite3_close(db1);
+
+        // Now we put in the financial dialog the statement for the account
+        // We first get the initial balance
+        sqlite3 *db;
+        int rc = sqlite3_open("banking_app_database.db", &db);
+        if (rc != SQLITE_OK){
+            fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+            sqlite3_close(db);
+            exit(1);
+        }
+
+        sqlite3_stmt *stmt;
+        const char *sql = "SELECT Amount FROM ActivityLog WHERE AccountID = ? AND ActivityType = 'Account creation'";
+        if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error preparing statement: %s\n", sqlite3_errmsg(db));
+            return;
+        }
+
+        // Bind parameters
+        if (sqlite3_bind_int(stmt, 1, account_id) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error binding parameter 1\n");
+            return;
+        }
+
+        // Execute the statement
+        int result;
+        int balance = 0;
+        while ((result = sqlite3_step(stmt)) == SQLITE_ROW)
+        {
+            int col_count = sqlite3_column_count(stmt);
+            for (int i = 0; i < col_count; i++)
+            {
+                const char *column_value = (const char *)sqlite3_column_text(stmt, i);
+                balance = atoi(column_value);
+            }
+            g_print("a");
+        }
+        // Finalize the statement
+        sqlite3_finalize(stmt);
+
+        // Close the database
+        sqlite3_close(db);
+
+        // Now we get the transactions
+        sqlite3 *db2;
+        int rc2 = sqlite3_open("banking_app_database.db", &db2);
+        if (rc2 != SQLITE_OK){
+            fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db2));
+            sqlite3_close(db2);
+            exit(1);
+        }
+
+        sqlite3_stmt *stmt2;
+        const char *sql2 = "SELECT Date, Notes, Amount, TransactionType FROM FinancialTransactions WHERE AccountID = ? ORDER BY substr(Date, 7, 4), substr(Date, 4, 2), substr(Date, 1, 2)";
+        
+        if (sqlite3_prepare_v2(db2, sql2, -1, &stmt2, NULL) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error preparing statement: %s\n", sqlite3_errmsg(db2));
+            return;
+        }
+
+        // Bind parameters
+        if (sqlite3_bind_int(stmt2, 1, account_id) != SQLITE_OK)
+        {
+            fprintf(stderr, "Error binding parameter 1\n");
+            return;
+        }
+
+        // Due to shortage of time I will destroy the old tree size view a bit and make it a bit ugly
+
+        financial_list_store = gtk_list_store_new(6, G_TYPE_STRING , G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+        GtkTreeIter iter;
+        gtk_list_store_append(financial_list_store, &iter);
+        gtk_list_store_set(financial_list_store, &iter, 0, "DATE", 1, "DESCRIPTION", 2, "AMOUNT", 3, "TYPE", 4, "beta-view", 5, "ACCOUNT BALANCE", -1);
+        char balance_string[256];
+        snprintf(balance_string, sizeof(balance_string), "%d", balance);
+        gtk_list_store_append(financial_list_store, &iter);
+        gtk_list_store_set(financial_list_store, &iter, 0, "-", 1, "-", 2, "-", 3, "Account creation", 4, "Initial ammount", 5,balance_string , -1);
+        // Execute the statement
+        int result1;
+        int acc_balance = balance;
+        while ((result1 = sqlite3_step(stmt)) == SQLITE_ROW)
+        {
+            // Get the data from the row
+            int col_count = sqlite3_column_count(stmt);
+            char *column_value[col_count];
+            for (int i = 0; i < col_count; i++)
+            {
+                column_value[i] = (char *)sqlite3_column_text(stmt, i);
+                if (i == 3)
+                {
+                    if (strcmp(column_value[i], "Deposit") == 0)
+                    {
+                        acc_balance = acc_balance + atoi(column_value[2]);
+                    }
+                    else if (strcmp(column_value[i], "Withdrawal") == 0 || strcmp(column_value[i], "Payment") == 0 || strcmp(column_value[i], "Transfer") == 0)
+                    {
+                        acc_balance = acc_balance - atoi(column_value[2]);
+                    }
+                }
+
+            }
+            char balance_string[256];
+            snprintf(balance_string, sizeof(balance_string), "%d", acc_balance);
+            // Add the data to the tree view
+            gtk_list_store_append(financial_list_store, &iter);
+            gtk_list_store_set(financial_list_store, &iter, 0, column_value[0], 1, column_value[1], 2, column_value[2], 3, column_value[3], 4, "-", 5, balance_string, -1);
+
+        }
+        // Finalize the statement
+        sqlite3_finalize(stmt);
+
+        // Close the database
+        sqlite3_close(db);
+
+        // Create the tree view
+        gtk_tree_view_set_model(financial_tree_view, GTK_TREE_MODEL(financial_list_store));
+        g_object_unref(financial_list_store);
+
+        // Show the dialog
+        gtk_dialog_run(financial_dialog);
+
+    }
+}
 
 // TODO implement when submiting transaction, instead of just customerID, to also be accountID, different than the first one and to check when submitting if transfer if 
 // customer exists and when transfering if account exists maybe

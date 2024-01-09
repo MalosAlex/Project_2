@@ -134,6 +134,16 @@ GtkTreeViewColumn *type_column;
 GtkTreeViewColumn *description_column;
 GtkTreeViewColumn *amount_column;
 
+GtkDialog *account_dialog;
+GtkBox *account_box;
+GtkButtonBox *account_button_box;
+GtkButton *account_show_button;
+GtkButton *account_close_button;
+GtkBox *account_entrybox;
+GtkLabel *account_entry_label;
+GtkEntry *account_entry_entry;
+GtkLabel *account_entry_error;
+
 
 void gui_init(void)
 {
@@ -277,6 +287,18 @@ void gui_init(void)
     description_column = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder,"description_column"));
     amount_column = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder,"amount_column"));
 
+
+    account_dialog = GTK_DIALOG(gtk_builder_get_object(builder,"account_dialog"));
+    account_box = GTK_BOX(gtk_builder_get_object(builder,"account_box"));
+    account_button_box = GTK_BUTTON_BOX(gtk_builder_get_object(builder,"account_button_box"));
+    account_show_button = GTK_BUTTON(gtk_builder_get_object(builder,"account_show_button"));
+    account_close_button = GTK_BUTTON(gtk_builder_get_object(builder,"account_close_button"));
+    account_entrybox = GTK_BOX(gtk_builder_get_object(builder,"account_entrybox"));
+    account_entry_label = GTK_LABEL(gtk_builder_get_object(builder,"account_entry_label"));
+    account_entry_entry = GTK_ENTRY(gtk_builder_get_object(builder,"account_entry_entry"));
+    account_entry_error = GTK_LABEL(gtk_builder_get_object(builder,"account_entry_error"));
+
+
     GtkCellRenderer *renderer;
 
     // Date column
@@ -332,6 +354,7 @@ void gui_init(void)
     g_signal_connect(main_rec_transactions, "clicked", G_CALLBACK(record_transactions), NULL);
     g_signal_connect(main_cus_data_manage, "clicked", G_CALLBACK(manage_customer_data), NULL);
     g_signal_connect(expense_report, "activate", G_CALLBACK(view_expense_report), NULL);
+    g_signal_connect(account_statement, "activate", G_CALLBACK(show_account), NULL);
 
     // Record window
     g_signal_connect(record_exit, "clicked", G_CALLBACK(hide_record), NULL);
@@ -376,6 +399,10 @@ void gui_init(void)
 
     // Financial dialog
     g_signal_connect(financial_close, "clicked", G_CALLBACK(hide_financial), NULL);
+
+    // Account dialog
+    g_signal_connect(account_show_button, "clicked", G_CALLBACK(show_statement), NULL);
+    g_signal_connect(account_close_button, "clicked", G_CALLBACK(hide_account), NULL);
 
 }
 

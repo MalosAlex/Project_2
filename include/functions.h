@@ -66,4 +66,7 @@ gboolean check_customer_email(GtkEntry *entry, gpointer user_data);
 void change_customer_db(int customer_id);
 void view_expense_report();
 void hide_financial(GtkButton *button, gpointer user_data);
+void show_account(GtkButton *button, gpointer user_data);
+void hide_account(GtkButton *button, gpointer user_data);
+void show_statement(GtkButton *button, gpointer user_data);
 #endif
